@@ -3,7 +3,7 @@ var router = express.Router();
 
 var multer = require('multer');
 var upload = multer({
-  dest: './public/uploads/'
+  dest: './public/uploads/images/'
 });
 
 router.post('/post', upload.array('images'),  require('./post.controller'));

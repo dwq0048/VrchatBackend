@@ -12,6 +12,8 @@ var usersRouter = require('./routes/users');
 var authRouter = require('./routes/api/auth');
 var boardRouter = require('./routes/api/board');
 
+var imageRouter = require('./routes/images');
+
 var app = express();
 
 app.use(cors({
@@ -33,6 +35,8 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/api/1/auth', authRouter);
 app.use('/api/1/board', boardRouter);
+
+app.use('/images/', imageRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

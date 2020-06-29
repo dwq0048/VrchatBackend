@@ -1,4 +1,5 @@
 const Post = require('../../../models/schema/post');
+//const Image = require('../../../models/schema/image')
 const sanitizeHtml = require('sanitize-html');
 
 const post = (req, res, next) => {
@@ -7,9 +8,6 @@ const post = (req, res, next) => {
         title : req.body.title,
         post : req.body.post
     }
-
-    console.log(req.body);
-    //console.log(req.files);
 
     const images = [];
     const files = [];
@@ -27,7 +25,7 @@ const post = (req, res, next) => {
         allowedAttributes: {
             'a': [ 'href', 'name', 'target' ],
             '*': [ 'style' ],
-            'img': [ 'data-index' ]
+            'img': [ 'data-index', 'src' ]
         },
         allowedStyles: {
             '*': {
@@ -35,7 +33,23 @@ const post = (req, res, next) => {
             }
         },
         allowedIframeHostnames: ['www.youtube.com'],
+        transformTags: {
+            'img': function(tagName, attribs) {
+                let imageIndex = attribs['data-index'];
+                let imagePath = '/images/'
+                let imageName = images[imageIndex].filename;
+
+                return {
+                    tagName: 'img',
+                    attribs: {
+                        src: imagePath+imageName
+                    }
+                };
+            }
+          }
     });
+
+    console.log(clean);
 
     const user = {
         userid : 'dwq0048',
@@ -85,6 +99,10 @@ const post = (req, res, next) => {
     }catch(e){
         error;
     }
+/*
+    Image.create(images)
+
+    */
 
     Post.create({
         title : data.title,
@@ -103,6 +121,9 @@ const post = (req, res, next) => {
         post : data.post
     }).then((req) => {
         success({ id : req._id });
+
+        
+
     }).catch((e) => {
         error(e);
     })   
