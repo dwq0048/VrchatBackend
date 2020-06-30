@@ -71,10 +71,9 @@ Post.statics.create = function(data){
     return post.save();
 }
 
-Post.statics.list = function(data){
-    const post = new this(data);
-    
-    return post.find({}).sort(['state.date', -1]).skip(0).limit(15);
+Post.statics.page = function(data){
+    data.page = (data.page * data.view);
+    return this.find({ board: data.board }).sort({'state.date': -1}).skip(data.page).limit(data.view);
 }
 
 module.exports = mongoose.model('Post', Post, true)
