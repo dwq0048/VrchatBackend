@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../../../models/schema/user');
 const Session = require('../../../models/schema/session');
+
 const secretToken = require('../../../models/helper/secret-token');
 
 
@@ -17,13 +18,13 @@ const login = (req, res, next) => {
     // 전송받은 데이터
     const query = {
         userid : req.body.userid,
-        password : req.body.password
+        userpw : req.body.userpw
     }
 
     // 로그인 검증
     const token = (user) => {
         if(user){
-            if(user.verify(query.password)){
+            if(user.verify(query.userpw)){
                 return new Promise((resolve, reject) => {
                     try {
                         resolve({
@@ -35,27 +36,24 @@ const login = (req, res, next) => {
                                 userid : user.userid,
                                 name: user.name,
                                 nickname: user.nickname,
-                                email: user.email
+                                email: user.email,
+                                access : {
+                                    auth: user.meta.auth,
+                                    rank: user.meta.rank,
+                                    point: user.meta.point,
+                                    check: user.meta.check
+                                }
                             }
                         });
                     } catch (e){
-                        reject({
-                            code: 003,
-                            message: 'jwt error'
-                        });
+                        reject('jwt error');
                     }
                 })
             }else{
-                throw new Error({
-                    code: 002,
-                    message: 'password error'
-                })
+                throw new Error('password error')
             }  
         }else{
-            throw new Error({
-                code: 002,
-                message: 'userid error'
-            })
+            throw new Error('userid error')
         }
     }
 
@@ -71,17 +69,11 @@ const login = (req, res, next) => {
                 }).then(() => {
                     resolve(token);
                 }).catch(() => {
-                    reject({
-                        code: 004,
-                        message: 'db error'
-                    });
+                    reject('db error');
                 })
             })
         } catch(e){
-            throw new Error({
-                code: 004,
-                message: 'db error'
-            });
+            throw new Error('db error');
         }
     }
 
@@ -91,15 +83,17 @@ const login = (req, res, next) => {
 
         res.cookie('_SESSION', data, { httpOnly: true })
         .status(200).json({
-            message: 'Login Success',
+            status: 'success',
             info: token.info
         });
     }
 
     // 에러
     const onError = (err) => {
-        console.log(err);
-        res.status(401).json(err);
+        res.status(200).json({
+            status: 'fail',
+            message: err.message
+        });
     }
 
     User.findOneByUserId(query.userid)

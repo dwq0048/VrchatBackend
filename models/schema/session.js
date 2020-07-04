@@ -16,9 +16,6 @@ Session.statics.create = function(data){
 }
 
 Session.statics.findOneByToken = function(refresh){
-    console.log(refresh);
-    console.log(this.findOne({ refresh : refresh }).user);
-    
     return this.findOne({
         refresh : refresh
     }).exec()
@@ -26,24 +23,15 @@ Session.statics.findOneByToken = function(refresh){
 
 Session.methods.verify = function(client, user, access){
     if(this.client != JSON.stringify(client)){
-        throw new Error({
-            code: 101,
-            message: 'Clients are different'
-        })
+        throw new Error('Clients are different')
     }
 
     if(this.user != user){
-        throw new Error({
-            code: 102,
-            message: 'The user ID is different'
-        })
+        throw new Error('The user ID is different')
     }
 
     if(this.access != access){
-        throw new Error({
-            code: 103,
-            message: 'Access Token is different'
-        })
+        throw new Error('Access Token is different')
     }
 
     return true
