@@ -22,7 +22,9 @@ const secret = {
         }catch(e){
             return false;
         }
-    }
+    },
+    AccessTime : '30m',
+    RefreshTime : '7d'
 }
 
 module.exports = secret;
