@@ -2,7 +2,7 @@ const Schema = require('../../../models/functions');
 
 const view = (req, res, next) => {
     const data = {
-        index: req.body.id,
+        index: req.body.index,
         board: req.body.board
     }
 
