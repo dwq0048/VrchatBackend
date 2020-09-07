@@ -166,4 +166,6 @@ const token = (req, res, next) => {
     access.then(respond).catch(check)
 }
 
+console.log('run Token');
+
 module.exports = token;

@@ -14,8 +14,26 @@ var authRouter = require('./routes/api/auth');
 var boardRouter = require('./routes/api/board');
 var imageRouter = require('./routes/files');
 
+const { networkInterfaces } = require('os');
+
+const nets = networkInterfaces();
+const results = [];
+const ports = 8080;
+const protocal = 'http';
+
+for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+        if (net.family === 'IPv4' && !net.internal) {
+          results.push(protocal + '://' + net.address + ':' + ports);
+        }
+    }
+}
+results.push(protocal + '://' + '127.0.0.1' + ':' + ports);
+
+console.log(results);
+
 app.use(cors({
-  origin:['http://127.0.0.1:8080'],
+  origin: results,
   credentials: true
 }));
 
