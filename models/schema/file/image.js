@@ -9,10 +9,7 @@ const Image = new mongoose.Schema({
     filename : { type : String }, // 기본 정보
     path : { type : String }, // 기본 정보
     size : { type : String }, // 기본 정보
-    user : {
-        index : { type : String }, // 업로드 유저 Primary Key
-        userid : { type: String }, // 업로드 유저 아이디
-    },
+    user : { type : mongoose.Schema.Types.ObjectId },
     info : {
         ip : { type : String }, // 아이피
         date : { type : String, default: Date }, // 업로드 날짜

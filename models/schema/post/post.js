@@ -20,7 +20,7 @@ const Post = new mongoose.Schema({
         date : { type : String, default : Date }, // 글쓴 날짜
         date_fix : { type : String, default: Date }, // 수정 날짜
     },
-    images : [],
+    images : [ mongoose.Schema.Types.ObjectId ],
     files: [],
     meta : { type : Object },
     post : { type : String } // 글
@@ -30,6 +30,10 @@ Post.statics.create = function(data){
     const post = new this(data);
     
     return post.save();
+}
+
+Post.statics.insetImage = function(data){
+    return this.updateMany({ _id: data.index }, { $set: { images: data.image }} );
 }
 
 module.exports = mongoose.model('Post', Post, true);

@@ -1,18 +1,14 @@
 const Schema = require('../../../models/functions');
-
-const { promisify } = require('util');
-const sharp = require("sharp");
-const sizeOf = promisify(require('image-size'));
+const ImageLoader = require('./post.images.controller');
 const sanitizeHtml = require('sanitize-html');
 
-const Today = Schema.HELP.formatDate(Date.now());
 
 const post = (req, res, next) => {
     // Response Result
-    const onResponse = (result) => {
+    const onResponse = (payload) => {
         res.status(200).json({
             state : 'success',
-            result
+            payload
         });
     }
 
@@ -43,6 +39,9 @@ const post = (req, res, next) => {
         content : ''
     }
 
+    let Request = {};
+    let UpdateRequest = {};
+
 
     // Setting Option
     const AllowedTags = {
@@ -69,8 +68,6 @@ const post = (req, res, next) => {
             }
         },
     }
-
-    
     // Setting Option End
 
     const Verification = () => {
@@ -103,7 +100,7 @@ const post = (req, res, next) => {
         return sanitizeHtml(text , Setting);
     }
 
-    const InsertPost = () => {
+    const InsertPost = async () => {
         const object = {
             title : RequestData.title,
             board : data.board,
@@ -116,20 +113,47 @@ const post = (req, res, next) => {
             post : RequestData.content
         }
         
-        onError('success');
-        /*
-        Schema.POST.create(object).then((req) => {
-            onResponse({ id : req._id });
+        await Schema.POST.Create(object).then((req) => {
+            Request = { status : true, payload : req }
         }).catch((e) => {
-            onError(e.message);
+            throw new Error(e.message);
         })
-        */
+        
+        return Request;
+    }
+
+    const UpdatePost = async (index, image) => {
+        const data = {
+            index : index,
+            image : image
+        };
+
+        await Schema.POST.Update(data).then((req) => {
+            UpdateRequest = { status : true, payload : req }
+        }).catch((error) => {
+            throw new Error(error.message);
+        })
+
+        return UpdateRequest;
     }
 
     const RunCommand = async () => {
         try{
             Verification();
-            InsertPost();    
+            const ResultPost = await InsertPost();
+            const ResultImage = await ImageLoader(user, ResultPost.payload._id, req.files);
+
+            if(ResultPost.status && ResultImage.status){
+                const ResultUpdate = await UpdatePost(ResultPost.payload._id, ResultImage.list);
+                console.log(ResultUpdate);
+                if(ResultUpdate.status){
+                    onResponse(ResultPost.payload);
+                }else {
+                    throw new Error('Update error');
+                }
+            }else{
+                throw new Error('Unknown error');
+            }
         } catch (error){
             console.log(error);
             onError(error.message);
@@ -138,7 +162,5 @@ const post = (req, res, next) => {
     RunCommand();
 
 }
-
-console.log('run Post');
 
 module.exports = post;

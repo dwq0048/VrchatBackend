@@ -12,27 +12,11 @@ const config = {
             images : '/images',
             imgPath : ''
         },
-        option : [
-            {
-                name : 'resize',
-                meta : {
-                    width: 850
-                }
-            },
-            {
-                name : 'resize',
-                meta : {
-                    width: 370
-                }
-            },
-            {
-                name : 'thumbnail',
-                meta : {
-                    width: 150,
-                    height: 150
-                }
+        option : {
+            resize : {
+                size : [ 480, 960 ]
             }
-        ],
+        },
         version : 'v0'
     }
 };

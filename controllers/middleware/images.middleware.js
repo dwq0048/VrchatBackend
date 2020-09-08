@@ -1,10 +1,7 @@
 const Schema = require('../../models/functions');
+const Helper = require('../../models/helper/index');
 const multer = require('multer');
 const fs = require('fs');
-
-const HELPER = {
-    formatDate : Schema.HELP.formatDate,
-}
 
 const config = require('../../config/index.js');
 const options = config.image;
@@ -18,7 +15,7 @@ const mkdir = ( dirPath ) => {
 
 const Storage = multer.diskStorage({
     destination: async function (req, file, cb) {
-        const Today = HELPER.formatDate(Date.now());
+        const Today = Helper.NORMAL.formatDate(Date.now());
 
         await mkdir( options.path.imgPath +'/'+ Today +'/'+ 'original' );
         await mkdir( options.path.imgPath +'/'+ Today +'/'+ 'fixed' );

@@ -28,6 +28,19 @@ const POST = {
             }
         })
     },
+    Update : (data) => {
+        return new Promise((resolve, reject) => {
+            try{
+                Schema.POST.insetImage(data).then((req) => {
+                    resolve(req);
+                }).catch((err) => {
+                    reject(err);
+                });
+            } catch(err) {
+                reject(err);
+            }
+        })
+    },
     Page : (data) => {
         return new Promise((resolve, reject) => {
             try{
@@ -118,20 +131,6 @@ const IMAGE = {
     }
 }
 
-const HELP = {
-    formatDate : (date) => {
-        let d = new Date(date);
-        let month = '' + (d.getMonth() + 1);
-        let day = '' + d.getDate();
-        let year = d.getFullYear();
-    
-        if (month.length < 2){ month = '0' + month };
-        if (day.length < 2){ day = '0' + day };
-    
-        return [year, month].join('');
-    }
-}
-
 module.exports = {
-    POST, IMAGE, HELP
+    POST, IMAGE
 }
