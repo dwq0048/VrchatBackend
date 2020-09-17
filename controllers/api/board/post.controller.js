@@ -145,7 +145,6 @@ const post = (req, res, next) => {
 
             if(ResultPost.status && ResultImage.status){
                 const ResultUpdate = await UpdatePost(ResultPost.payload._id, ResultImage.list);
-                console.log(ResultUpdate);
                 if(ResultUpdate.status){
                     onResponse(ResultPost.payload);
                 }else {

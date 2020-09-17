@@ -108,7 +108,6 @@ const POST = {
                     },
                 ] , function(rr,ra){
                     if(ra){
-                        console.log(ra);
                         resolve(ra);
                     }
                 })
@@ -128,6 +127,15 @@ const IMAGE = {
                 reject(err);
             })
         });
+    },
+    View : (data) => {
+        return new Promise((resolve, reject) => {
+            Schema.IMAGE.findOne({ _id : data.index }).then((req) => {
+                resolve(req);
+            }).catch((error) => {
+                reject(error);
+            })
+        })
     }
 }
 

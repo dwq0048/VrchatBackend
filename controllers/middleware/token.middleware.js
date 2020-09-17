@@ -68,13 +68,19 @@ const token = (req, res, next) => {
 
     // 만료된 토큰 일경우
     const check = (err) => {
-        console.log(err);
-        switch(err.name){
-            case 'TokenExpiredError':
-                accessExpired();
-                break;
-            default:
-                onError(err);
+        if(err.name){
+            switch(err.message){
+                case 'jwt expired':
+                    accessExpired();
+                    break;
+                case 'jwt must be provided':
+                    onError(err);
+                    break;
+                default:
+                    onError(err);
+            }
+        }else{
+            onError(err);
         }
     }
 

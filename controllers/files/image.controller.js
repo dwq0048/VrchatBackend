@@ -1,11 +1,78 @@
-const Schema = {
-    IMAGE: require('../../models/schema/file/image')
-}
+const Schema = require('../../models/functions');
+const Helper = require('../../models/helper/index');
 
 const fs = require('fs');
 const stream = require('stream');
 
 const image = (req, res, next) => {
+    // Response Result
+    const onResponse = (payload) => {
+        res.status(200).json({
+            state : 'success',
+            payload
+        });
+    }
+
+    const onError = (message) => {
+        res.status(401).json({
+            state : 'error',
+            message : message
+        });
+    }
+    // Response Result End
+
+    const payload = {
+        index : req.params.id,
+        query : req.query
+    }
+    
+    const Path = `./public/uploads/images`;
+    let ViewRequest = {};
+
+    const LoadUrl = async (data) => {
+        const ThisDay = Helper.NORMAL.formatDate(data.info.date);
+        let array = [];
+        if(payload.query.resize){
+            array.push('X'+payload.query.resize);
+        }
+        array = (array.length != 0) ? '_fixed+'+array.join('+') : '_original';
+        const Loader = `${Path}/${ThisDay}/fixed/${data.filename}${array}`;
+
+        const r = fs.createReadStream(Loader);
+        const ps = new stream.PassThrough();
+        stream.pipeline(r, ps, (err) => {
+            if (err) {
+                onError(err);
+            }
+        });
+    
+        ps.pipe(res);
+    }
+
+    const ViewImage = async () => {
+        await Schema.IMAGE.View(payload).then((req) => {
+            ViewRequest = { status : true, payload : req };
+        }).catch((error) => {
+            throw new Error(error.message);
+        });
+
+        return ViewRequest;
+    }
+
+    const RunCommand = async () => {
+        try{
+            const ResultView = await ViewImage();
+            LoadUrl(ResultView.payload);
+        } catch (error){
+            console.log(error);
+            onError(error.message);
+        }
+    }
+    RunCommand();
+
+}
+
+const image_temp = (req, res, next) => {
     const payload = {
         index : req.params.id
     }
