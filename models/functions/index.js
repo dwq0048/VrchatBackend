@@ -49,7 +49,7 @@ const POST = {
                         "$match" : { "board" : data.board }
                     },
                     {
-                        "$sort" : { 'state.date': 1 }
+                        "$sort" : { 'state.date': -1 }
                     },
                     {
                         "$skip" : data.page
