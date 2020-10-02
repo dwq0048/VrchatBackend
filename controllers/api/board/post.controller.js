@@ -87,7 +87,12 @@ const post = (req, res, next) => {
                     },
                     category : ['default'],
                     admissionMeta : ['category', 'openSetting', 'hash'],
-                    openSetting : ['search', 'anonymous', 'private']
+                    openSetting : ['search', 'anonymous', 'private'],
+                    hash : {
+                        leng : 30,
+                        size: 30,
+                        setting: 1,
+                    },
                 },
             }
         },
@@ -105,7 +110,8 @@ const post = (req, res, next) => {
                     },
                     category : ['default'],
                     admissionMeta : ['category', 'openSetting', 'hash'],
-                    openSetting : ['search', 'anonymous', 'private']
+                    openSetting : ['search', 'anonymous', 'private'],
+                    hash : { leng : 30, size: 30, setting: 1 },
                 },
             }
         },
@@ -113,15 +119,15 @@ const post = (req, res, next) => {
             auth : [1],
             verification : {
                 1 : {
-                    title : {
-                        command : true,
-                        setting : 1
-                    },
                     content : {
                         command : true,
                         setting : 1 
                     },
                     category : ['default'],
+                    admissionMeta : ['category', 'openSetting', 'mod', 'hash'],
+                    openSetting : ['search', 'anonymous', 'private'],
+                    mod : ['horizontal', 'vertical'],
+                    hash : { leng : 30, size: 30, setting: 1 },
                 },
             }
         }
@@ -182,7 +188,6 @@ const post = (req, res, next) => {
 
         // 메타 검증
         if(typeof data.meta == 'object'){
-            console.log(typeof filter.admissionMeta);
             // 승인된 메타 검증
             if(typeof filter.admissionMeta == 'object'){
                 let garbage = 0;
@@ -203,7 +208,7 @@ const post = (req, res, next) => {
                     throw new Error('This category does not exist');
                 }
                 let garbage = undefined;
-                filter.category.forEach(item => {
+                filter.category.map(item => {
                     if(item == data.meta.category){ garbage = true }
                 });
                 if(garbage == undefined){
@@ -217,7 +222,7 @@ const post = (req, res, next) => {
                     throw new Error('This openSetting does not exist');
                 }
                 let garbage = 0;
-                filter.openSetting.forEach(item => {
+                filter.openSetting.map(item => {
                     for (let object in data.meta.openSetting) {
                         if(item == object){ garbage++ }
                     }
@@ -226,6 +231,33 @@ const post = (req, res, next) => {
                 if(filter.openSetting.length != garbage){
                     throw new Error('The openSetting has broken out');
                 }
+            }
+
+            // 이미지 설정 검증
+            console.log(typeof filter.mod);
+            if(typeof filter.mod == 'object'){
+                let garbage = 0;
+                filter.mod.forEach(item => {
+                    if(item == data.meta.mod){ garbage++ }
+                });
+                if(garbage!=1){
+                    throw new Error('The mod has broken out');
+                }
+            }
+
+            // 헤시 조회
+            if(typeof filter.hash == 'object'){
+                if(typeof filter.hash.leng == 'number'){
+                    let garbage = 0;
+                    data.meta.hash.map(item => {
+                        garbage++
+                    });
+
+                    if(filter.hash.leng < garbage){
+                        throw new Error('Too many tags');
+                    }
+                }
+                // 그외는 나중에 하셈
             }
         }else{
             throw new Error('The meta object does not exist');
