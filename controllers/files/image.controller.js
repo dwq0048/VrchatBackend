@@ -32,8 +32,24 @@ const image = (req, res, next) => {
     const LoadUrl = async (data) => {
         const ThisDay = Helper.NORMAL.formatDate(data.info.date);
         let array = [];
+        let Garbage = 0;
+        console.log(data);
         if(payload.query.resize){
-            array.push('X'+payload.query.resize);
+            if(typeof data.meta == 'object'){
+                if(typeof data.meta.options == 'object'){
+                    if(typeof data.meta.resize == 'array'){
+                        data.options.resize.map(item => {
+                            if(item >= payload.query.resize){
+                                Garbage = item;
+                                return;
+                            }
+                        });
+                    }
+                }
+            }
+            if(Garbage != 0){
+                array.push('X'+payload.query.resize);
+            }
         }
         array = (array.length != 0) ? '_fixed+'+array.join('+') : '_original';
         const Loader = `${Path}/${ThisDay}/fixed/${data.filename}${array}`;

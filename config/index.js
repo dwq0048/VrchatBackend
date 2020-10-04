@@ -14,7 +14,7 @@ const config = {
         },
         option : {
             resize : {
-                size : [ 480, 960 ]
+                size : [ 480, 960, 1200 ]
             }
         },
         version : 'v0'
