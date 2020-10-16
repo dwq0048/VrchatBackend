@@ -186,6 +186,20 @@ const post = (req, res, next) => {
             }
         }
 
+        // Photo 에서 제목 부분
+        if(data.board == 'photo'){
+            const RegMatch = /^(<([^>]+))(>([^>]+))(<\/([^>]+)>)/ig;
+            const RegPlace = /^(<([^>]+))(>([^>]+))(<\/([^>]+)>)/i;
+
+            RequestData.title = RequestData.content.match(RegMatch);
+            if(RequestData.title != null){
+                RequestData.title = RequestData.title[0];
+                RequestData.content = RequestData.content.replace(RegPlace, '');
+            }
+
+            RequestData.title = SetHtml('title', 1, RequestData.title);
+        }
+
         // 메타 검증
         if(typeof data.meta == 'object'){
             // 승인된 메타 검증
@@ -234,7 +248,6 @@ const post = (req, res, next) => {
             }
 
             // 이미지 설정 검증
-            console.log(typeof filter.mod);
             if(typeof filter.mod == 'object'){
                 let garbage = 0;
                 filter.mod.forEach(item => {

@@ -1,6 +1,4 @@
-const Schema = {
-    COMMENT : require('../../../models/schema/post/comment')
-};
+const Schema = require('../../../models/functions');
 
 const post = (req, res, next) => {
 
@@ -49,7 +47,7 @@ const post = (req, res, next) => {
         });
     }
 
-    Schema.COMMENT.create(object).then((req) => {
+    Schema.COMMENT.Create(object).then((req) => {
         response(req);
     }).catch((err) => {
         onError(err.message)

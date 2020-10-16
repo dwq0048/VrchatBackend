@@ -8,9 +8,10 @@ const Middleware = {
 
 
 router.post('/post', Middleware.TOKEN, Middleware.IMAGES, require('../../../controllers/api/board/post.controller'));
+router.post('/post/log', Middleware.TOKEN, require('../../../controllers/api/board/post.log.controller'));
 
 router.post('/list/:id', require('../../../controllers/api/board/list.controller'));
-router.post('/view/:id', require('../../../controllers/api/board/view.controller'));
+router.post('/view/:id', Middleware.TOKEN, require('../../../controllers/api/board/view.controller'));
 
 router.post('/comment', require('../../../controllers/api/board/comment.controller'));
 router.post('/comment/reply', Middleware.TOKEN, require('../../../controllers/api/board/reply.controller'));

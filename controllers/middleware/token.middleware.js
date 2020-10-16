@@ -26,7 +26,7 @@ const token = (req, res, next) => {
                 resolve({decode: decoded});
             })
         }catch(err){
-            console.log(err);
+            //console.log(err);
         }
     })
 
@@ -171,7 +171,5 @@ const token = (req, res, next) => {
 
     access.then(respond).catch(check)
 }
-
-console.log('run Token');
 
 module.exports = token;

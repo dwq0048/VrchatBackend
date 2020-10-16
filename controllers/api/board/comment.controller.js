@@ -1,10 +1,8 @@
-const Schema = {
-    COMMENT : require('../../../models/schema/post/comment')
-};
+const Schema = require('../../../models/functions');
 
 const Comment = (req, res, next) => {
     const data = {
-        inex: req.body.index,
+        index: req.body.index,
         board: req.body.board,
         page: req.body.page,
         view: req.body.view
@@ -24,11 +22,18 @@ const Comment = (req, res, next) => {
         });
     }
 
-    Schema.COMMENT.page(data).then((req) => {
-        success(req)
-    }).catch((err) => {
-        error(err)
-    })
+    const UpdatePost = () => {
+        Schema.COMMENT.List(data).then((req) => {
+            success(req)
+        }).catch((err) => {
+            error(err)
+        })
+    }
+
+    const RunCommand = () => {
+        UpdatePost()
+    }
+    RunCommand();
 
 
 }
