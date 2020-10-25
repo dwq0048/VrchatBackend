@@ -36,23 +36,16 @@ const view = (req, res, next) => {
         let object = { clients : undefined, users : undefined };
         await Schema.POST.LogFind(data).then((req) => {
             if(typeof req == 'object'){
-                if(req.length <= 0){ PostLog() }else{
+                if(req.length <= 0){ PostLog() }
+                else{
                     req.map(item => {
-                        if(item.type == 'clients'){
-                            object.clients = item;
-                        }else if(item.type == 'users'){
-                            object.users = item;
-                        }
+                        if(item.type == 'clients'){ object.clients = item }
+                        else if(item.type == 'users'){ object.users = item }
                     })
                     
-                    if(typeof object.clients == undefined){
-                        PostLog('client');
-                    }
-
+                    if(typeof object.clients == undefined){ PostLog('client') }
                     if(typeof object.users == undefined){
-                        if(data.user != undefined){
-                            PostLog('user');
-                        }
+                        if(data.user != undefined){ PostLog('user') }
                     }
                 }
             }
@@ -94,6 +87,7 @@ const view = (req, res, next) => {
             await PostCount();
             const ResultCount = await Count();
             const ResultView = await PostView();
+
             onResponse(ResultView.payload[0], ResultCount );
         } catch (error){
             console.log(error);
