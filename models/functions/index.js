@@ -108,8 +108,17 @@ const POST = {
                             "as" : "ImageMeta"
                         }
                     },
+                    /*{
+                        "$lookup" : {
+                            "from" : Schema.COMMENT.collection.name,
+                            "localField" : "_id",
+                            "foreignField" : "_parent",
+                            "as" : "comment"
+                        }
+                    },*/
                 ] , function(rr,ra){
                     if(ra){
+                        console.log(ra);
                         resolve(ra);
                     }
                 })
@@ -178,7 +187,6 @@ const POST = {
                     { '$group' : { '_id' : new ObjectId(data.index), 'count' : { '$sum' : 1 } } }
                 ], function(rr, ra){
                     if(ra){
-                        console.log(ra);
                         resolve(ra)
                     }
                 });
@@ -204,7 +212,7 @@ const COMMENT = {
             try{
                 Schema.COMMENT.aggregate([
                     {
-                        "$match" : { "parent" : data.index }
+                        "$match" : { "_parent" : new ObjectId(data.index) }
                     },
                     {
                         "$sort" : { 'state.date_fix' : -1 }
@@ -223,6 +231,22 @@ const COMMENT = {
                             "as" : "users"
                         }
                     }
+                ], function(rr, ra){
+                    if(ra){
+                        resolve(ra);
+                    }
+                });
+            } catch(err){
+                reject(err);
+            }
+        })
+    },
+    Count : (data) => {
+        return new Promise((resolve, reject) => {
+            try{
+                Schema.COMMENT.aggregate([
+                    { "$match" : { "_parent" : new ObjectId(data.index)} },
+                    { '$group' : { '_id' : new ObjectId(data.index), 'count' : { '$sum' : 1 } } }
                 ], function(rr, ra){
                     if(ra){
                         resolve(ra);

@@ -2,11 +2,12 @@ const Schema = require('../../../models/functions');
 
 const view = (req, res, next) => {
     // Response Result
-    const onResponse = (payload, count) => {
+    const onResponse = (payload, count, comment) => {
         res.status(200).json({
             state : 'success',
             payload,
-            count : count
+            count : count,
+            comment : comment
         });
     }
 
@@ -24,6 +25,7 @@ const view = (req, res, next) => {
 
     let ViewRequest = {};
     let ViewCount = {};
+    let CommentCount = {};
     let data = { index: req.body.index, board: req.body.board, client : client.host };
 
     if(LocalPayload.status == 'success'){
@@ -72,7 +74,7 @@ const view = (req, res, next) => {
         return ViewRequest;
     }
 
-    const Count = async () => {
+    const CountView = async () => {
         await Schema.POST.PostCount(data).then((req) => {
             ViewCount = (req.length > 0) ? req[0].count : 0;
         }).catch((error) => {
@@ -82,13 +84,24 @@ const view = (req, res, next) => {
         return ViewCount;
     }
 
+    const CountComment = async () => {
+        await Schema.COMMENT.Count(data).then((req) => {
+            CommentCount = (req.length > 0) ? req[0].count : 0;
+        }).catch((error) => {
+            throw new Error(error.message);
+        })
+
+        return CommentCount;
+    }
+
     const RunCommand = async () => {
         try{
             await PostCount();
-            const ResultCount = await Count();
+            const ResultCount = await CountView();
             const ResultView = await PostView();
+            const ResultComment = await CountComment();
 
-            onResponse(ResultView.payload[0], ResultCount );
+            onResponse( ResultView.payload[0], ResultCount, ResultComment );
         } catch (error){
             console.log(error);
             onError(error.message);

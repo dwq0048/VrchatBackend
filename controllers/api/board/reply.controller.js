@@ -16,7 +16,7 @@ const post = (req, res, next) => {
     }
 
     const object = {
-        parent : data.index,
+        _parent : data.index,
         title : '',
         board : data.board,
         user : {

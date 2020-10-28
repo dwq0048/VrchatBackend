@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 
 const Comment = new mongoose.Schema({
-    parent : { type : String }, // 엄마
+    _parent : { type : mongoose.Schema.Types.ObjectId }, // 엄마
     title : { type : String }, // 제목
     board : { type : String }, // 게시판 종류
     user : {
