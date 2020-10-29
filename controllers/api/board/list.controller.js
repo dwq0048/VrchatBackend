@@ -7,6 +7,9 @@ const List = (req, res, next) => {
         view: req.body.view
     }
 
+    let ListRequest = {};
+    let CommentCount = {};
+
     const onError = (message) => {
         res.status(401).json({
             state: 'error',
@@ -21,16 +24,18 @@ const List = (req, res, next) => {
         })
     }
 
-    const page = () => {
+    const Page = () => {
         Schema.POST.Page(data).then((req) => {
             onResponse(req);
         }).catch((err) => {
             onError(err)
         })
+
+        return ListRequest;
     }
 
-    const RunCommand = () => {
-        page();
+    const RunCommand = async () => {
+        Page();
     }
 
     try{
