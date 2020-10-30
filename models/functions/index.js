@@ -129,14 +129,27 @@ const POST = {
                             "as" : "ImageMeta"
                         }
                     },
-                    /*{
+                    {
                         "$lookup" : {
                             "from" : Schema.COMMENT.collection.name,
-                            "localField" : "_id",
-                            "foreignField" : "_parent",
+                            "let" : {
+                                "index" : "$_id"
+                            },
+                            "pipeline" : [
+                                {
+                                    "$match" : {
+                                        "$expr" : {
+                                            "$and" : [
+                                                { "$eq" : [ "$_parent", "$$index" ] }
+                                            ]
+                                        }
+                                    },
+                                },
+                                { "$group" : { _id: null, count: { $sum: 1 } } }
+                            ],
                             "as" : "comment"
-                        }
-                    },*/
+                        },
+                    },
                 ] , function(rr,ra){
                     if(ra){
                         console.log(ra);
