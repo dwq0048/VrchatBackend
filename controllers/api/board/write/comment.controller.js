@@ -1,4 +1,4 @@
-const Schema = require('../../../models/functions');
+const Schema = require('../../../../models/functions');
 
 const post = (req, res, next) => {
 
@@ -43,16 +43,32 @@ const post = (req, res, next) => {
     const onError = (err) => {
         res.status(200).json({
             state : 'fail',
-            message: err.message
+            message: err
         });
     }
 
-    Schema.COMMENT.Create(object).then((req) => {
-        response(req);
-    }).catch((err) => {
-        onError(err.message)
-    })
+    const UploadComment = async () => {
+        let payload = {};
 
+        await Schema.COMMENT.Write.Create(object).then((req) => {
+            payload = req;
+        }).catch((err) => {
+            throw new Error(err.message)
+        })
+
+        return payload;
+    }
+
+    const RunCommand = async () => {
+        try {
+            let result = await UploadComment();
+            response(result);
+        }catch (err) {
+            onError(err);
+        }
+
+    }
+    RunCommand();
 
 }
 

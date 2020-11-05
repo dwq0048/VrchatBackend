@@ -1,4 +1,4 @@
-const Schema = require('../../../models/functions');
+const Schema = require('../../../../models/functions');
 const ImageLoader = require('./post.images.controller');
 const sanitizeHtml = require('sanitize-html');
 
@@ -301,7 +301,7 @@ const post = (req, res, next) => {
             meta : data.meta
         }
         
-        await Schema.POST.Create(object).then((req) => {
+        await Schema.POST.Write.Create(object).then((req) => {
             Request = { status : true, payload : req }
         }).catch((e) => {
             throw new Error(e.message);
@@ -316,7 +316,7 @@ const post = (req, res, next) => {
             image : image
         };
 
-        await Schema.POST.Update(data).then((req) => {
+        await Schema.POST.Write.Update(data).then((req) => {
             UpdateRequest = { status : true, payload : req }
         }).catch((error) => {
             throw new Error(error.message);

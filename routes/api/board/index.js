@@ -6,14 +6,16 @@ const Middleware = {
 	IMAGES : require('../../../controllers/middleware/images.middleware'),
 }
 
+// Read
+router.post('/read/list/:id', require('../../../controllers/api/board/read/list.controller'));
+router.post('/read/post/like', Middleware.TOKEN, require('../../../controllers/api/board/read/post.like.controller'));
+router.post('/read/view/:id', Middleware.TOKEN, require('../../../controllers/api/board/read/view.controller'));
+router.post('/read/comment', require('../../../controllers/api/board/read/comment.controller'));
 
-router.post('/post', Middleware.TOKEN, Middleware.IMAGES, require('../../../controllers/api/board/post.controller'));
-router.post('/post/log', Middleware.TOKEN, require('../../../controllers/api/board/post.log.controller'));
-
-router.post('/list/:id', require('../../../controllers/api/board/list.controller'));
-router.post('/view/:id', Middleware.TOKEN, require('../../../controllers/api/board/view.controller'));
-
-router.post('/comment', require('../../../controllers/api/board/comment.controller'));
-router.post('/comment/reply', Middleware.TOKEN, require('../../../controllers/api/board/reply.controller'));
+// Write
+router.post('/write/post', Middleware.TOKEN, Middleware.IMAGES, require('../../../controllers/api/board/write/post.controller'));
+//router.post('/write/post/log/', Middleware.TOKEN, require('../../../controllers/api/board/write/post.log.controller'));
+router.post('/write/post/like', Middleware.TOKEN, require('../../../controllers/api/board/write/post.like.controller'))
+router.post('/write/comment', Middleware.TOKEN, require('../../../controllers/api/board/write/comment.controller'));
 
 module.exports = router;

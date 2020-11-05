@@ -1,4 +1,4 @@
-const Schema = require('../../../models/functions');
+const Schema = require('../../../../models/functions');
 
 const view = (req, res, next) => {
     // Response Result
@@ -34,7 +34,7 @@ const view = (req, res, next) => {
 
     const PostCount = async () => {
         let object = { clients : undefined, users : undefined };
-        await Schema.POST.LogFind(data).then((req) => {
+        await Schema.POST.Read.LogFind(data).then((req) => {
             if(typeof req == 'object'){
                 if(req.length <= 0){ PostLog() }
                 else{
@@ -55,31 +55,31 @@ const view = (req, res, next) => {
     };
 
     const PostLog = async (count = undefined) => {
-        await Schema.POST.PostLog(data, count).then((req) => {
+        await Schema.POST.Write.PostLog(data, count).then((req) => {
             console.log(req);
         }).catch((error) => {
             throw new Error(error.message)
         });
     };
 
-    const PostView = async () => {
-        await Schema.POST.View(data).then((req) => {
-            ViewRequest = { status : true, payload : req }
-        }).catch((error) => {
-            throw new Error(error.message);
-        })
-
-        return ViewRequest;
-    }
-
     const CountView = async () => {
-        await Schema.POST.PostCount(data).then((req) => {
+        await Schema.POST.Read.PostCount(data).then((req) => {
             ViewCount = (req.length > 0) ? req[0].count : 0;
         }).catch((error) => {
             throw new Error(error.message);
         });
 
         return ViewCount;
+    }
+
+    const PostView = async () => {
+        await Schema.POST.Read.View(data).then((req) => {
+            ViewRequest = { status : true, payload : req }
+        }).catch((error) => {
+            throw new Error(error.message);
+        })
+
+        return ViewRequest;
     }
 
     const RunCommand = async () => {

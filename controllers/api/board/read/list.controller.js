@@ -1,4 +1,4 @@
-const Schema = require('../../../models/functions');
+const Schema = require('../../../../models/functions');
 
 const List = (req, res, next) => {
     const data = {
@@ -25,7 +25,7 @@ const List = (req, res, next) => {
     }
 
     const Page = () => {
-        Schema.POST.Page(data).then((req) => {
+        Schema.POST.Read.Page(data).then((req) => {
             onResponse(req);
         }).catch((err) => {
             onError(err)

@@ -1,7 +1,7 @@
-const Schema = require('../../../models/functions');
-const Helper = require('../../../models/helper/index');
+const Schema = require('../../../../models/functions');
+const Helper = require('../../../../models/helper/index');
 
-const config = require('../../../config/index.js');
+const config = require('../../../../config/index.js');
 const options = { image : config.image };
 
 const { promisify } = require('util');
@@ -66,7 +66,7 @@ const loader = async (user, index, files) => {
     }
 
     const InsertImage = async () => {
-        await Schema.IMAGE.InsertToo(images).then((req) => {
+        await Schema.IMAGE.Write.InsertToo(images).then((req) => {
             try {
                 Request.list = [];
                 Request.status = true;

@@ -1,4 +1,4 @@
-const Schema = require('../../../models/functions');
+const Schema = require('../../../../models/functions');
 
 const Comment = (req, res, next) => {
     const data = {
@@ -23,7 +23,7 @@ const Comment = (req, res, next) => {
     }
 
     const UpdatePost = () => {
-        Schema.COMMENT.List(data).then((req) => {
+        Schema.COMMENT.Read.List(data).then((req) => {
             success(req)
         }).catch((err) => {
             error(err)

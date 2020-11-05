@@ -73,7 +73,7 @@ app.set('jwt-re-secret', config.JWT.ReSecret);
 
 // DB
 mongoose.Promise = global.Promise;
-mongoose.connect(config.DB.address, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(config.DB.address, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
   .then(() => console.log('Successfully connected to mongodb'))
   .catch(e => console.error(e));
 
