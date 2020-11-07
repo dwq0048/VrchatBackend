@@ -75,6 +75,26 @@ const POST = {
                                                 { "$expr" : { "$eq" : [ "$index", "$$index" ] } },
                                                 { "type" : 'like' },
                                                 { "meta.state" : true },
+                                                { "meta.user" : new ObjectId(data.user) },
+                                            ]
+                                        }
+                                    },
+                                    { "$group" : { _id: null, count: { $sum: 1 } } }
+                                ],
+                                "as" : "like_check"
+                            }
+                        },
+                        {
+                            "$lookup" : {
+                                "from" : Schema.POST_LOG.collection.name,
+                                "let" : { "index" : "$_id" },
+                                "pipeline" : [
+                                    {
+                                        "$match" : {
+                                            "$and" : [
+                                                { "$expr" : { "$eq" : [ "$index", "$$index" ] } },
+                                                { "type" : 'like' },
+                                                { "meta.state" : true },
                                             ]
                                         }
                                     },
@@ -82,7 +102,25 @@ const POST = {
                                 ],
                                 "as" : "like_count"
                             }
-                        }
+                        },
+                        {
+                            "$lookup" : {
+                                "from" : Schema.POST_LOG.collection.name,
+                                "let" : { "index" : "$_id" },
+                                "pipeline" : [
+                                    {
+                                        "$match" : {
+                                            "$and" : [
+                                                { "$expr" : { "$eq" : [ "$index", "$$index" ] } },
+                                                { "type" : 'views' },
+                                            ]
+                                        }
+                                    },
+                                    { "$group" : { _id: null, count: { $sum: 1 } } }
+                                ],
+                                "as" : "views_count"
+                            }
+                        },
                     ], function(rr,ra){
                         if(ra){
                             resolve(ra)
@@ -173,10 +211,27 @@ const POST = {
                                 ],
                                 "as" : "like_count"
                             }
-                        }
+                        },
+                        {
+                            "$lookup" : {
+                                "from" : Schema.POST_LOG.collection.name,
+                                "let" : { "index" : "$_id" },
+                                "pipeline" : [
+                                    {
+                                        "$match" : {
+                                            "$and" : [
+                                                { "$expr" : { "$eq" : [ "$index", "$$index" ] } },
+                                                { "type" : 'views' },
+                                            ]
+                                        }
+                                    },
+                                    { "$group" : { _id: null, count: { $sum: 1 } } }
+                                ],
+                                "as" : "views_count"
+                            }
+                        },
                     ] , function(rr,ra){
                         if(ra){
-                            console.log(ra);
                             resolve(ra);
                         }
                     })
@@ -197,32 +252,12 @@ const POST = {
                 })
             });
         },
-        PostCount : (data) => {
-            return new Promise((resolve, reject) => {
-                try {
-                    Schema.POST_LOG.aggregate([
-                        { '$match' :  { 'index' : new ObjectId(data.index), type : 'count' } },
-                        { '$group' : { '_id' : new ObjectId(data.index), 'count' : { '$sum' : 1 } } }
-                    ], function(rr, ra){
-                        if(ra){
-                            resolve(ra)
-                        }
-                    });
-                }catch(err){
-                    reject(err);
-                }
-            }); 
-        },
         PostLike : (data) => {
             return new Promise((resolve, reject) => {
                 try {
                     Schema.POST_LOG.aggregate([
                         { '$match' :  { 'index' : new ObjectId(data.index), type : 'like', "meta.user" : new ObjectId(data.user) } },
-                    ], function(rr, ra){
-                        if(ra){
-                            resolve(ra)
-                        }
-                    });
+                    ], function(rr, ra){ if(ra){ resolve(ra) } });
                 }catch(err){
                     reject(err);
                 }
@@ -256,44 +291,44 @@ const POST = {
                 }
             })
         },
-        PostLog : (data, count) => {
+        PostCount : (data) => {
+            let meta = { };
+            (data.user) ? meta["meta.user"] = { $each : [data.user] } : undefined;
+            (data.host) ? meta["meta.host"] = { $each : [data.host] } : undefined;
+
+            const filter = {
+                $or : [
+                    { $and : [
+                        { type: 'views' },
+                        { index: new ObjectId(data.index) },
+                        { "meta.user": [ data.user ] }
+                    ] },
+                    { $and : [
+                        { type: 'views' },
+                        { index: new ObjectId(data.index) },
+                        { "meta.host": [ data.host ] },
+                    ] }
+                ],
+            };
+            const update = { $setOnInsert: {
+                type: 'views', date: new Date(), index: new ObjectId(data.index), "meta.user": new Array(), "meta.host": new Array()
+            }};
+            const options = { upsert : true, new : true };
+
             return new Promise((resolve, reject) => {
-                if(count == undefined){
-                    let Array = [];
-                    Array.push({
-                        index : data.index,
-                        type : 'clients',
-                        meta : { client : data.client }
-                    });
-    
-                    if(data.user != undefined){
-                        Array.push({
-                            index : data.index,
-                            type : 'users',
-                            meta : { user : data.user }
-                        });
-                    }
-    
-                    Array.push({ index : data.index, type : 'count' });
-    
-                    Schema.POST_LOG.insertMany(Array).then((req) => {
+                Schema.POST_LOG.findOneAndUpdate(filter, update, options).then((req) => {
+                    const FindFilter = { _id : new ObjectId(req._id) };
+                    const FindUpdate = { $addToSet : meta, $setOnInsert: { date: new Date() } };
+                    const FindOptions = { upsert : true, new : true };
+
+                    Schema.POST_LOG.findOneAndUpdate(FindFilter, FindUpdate, FindOptions).then((req) => {
                         resolve(req);
                     }).catch((err) => {
                         reject(err);
-                    });
-                }else if(count == 'client' || count == 'user'){
-                    let Object = {
-                        index : data.index,
-                        type : (count == 'client') ? 'clients' : 'users',
-                        meta : (count == 'client') ? { client : data.client } : { user : data.user }
-                    };
-    
-                    Schema.POST_LOG.create(Object).then((req) => {
-                        resolve(req);
-                    }).catch((err) => {
-                        reject(err);
-                    });
-                }
+                    })
+                }).catch((err) => {
+                    reject(err);
+                })
             });
         },
         PostLike : (data) => {

@@ -8,30 +8,38 @@ const Comment = (req, res, next) => {
         view: req.body.view
     }
 
-    const success = (result) => {
+    const onResponse = (payload) => {
         res.status(200).json({
             state : 'success',
-            result
+            payload
         });
     }
 
-    const error = (err) => {
+    const onError = (err) => {
         res.status(200).json({
             state : 'fail',
             message: err.message
         });
     }
 
-    const UpdatePost = () => {
-        Schema.COMMENT.Read.List(data).then((req) => {
-            success(req)
+    const UpdatePost = async () => {
+        let ResultComment = {};
+        await Schema.COMMENT.Read.List(data).then((req) => {
+            ResultComment = req;
         }).catch((err) => {
-            error(err)
+            throw new Error(err);
         })
+
+        return ResultComment;
     }
 
-    const RunCommand = () => {
-        UpdatePost()
+    const RunCommand = async () => {
+        try {
+            let ResultComment = await UpdatePost();
+            onResponse(ResultComment);
+        }catch(err){
+            onError(err);
+        }
     }
     RunCommand();
 

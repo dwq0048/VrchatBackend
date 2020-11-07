@@ -7,13 +7,10 @@ const List = (req, res, next) => {
         view: req.body.view
     }
 
-    let ListRequest = {};
-    let CommentCount = {};
-
-    const onError = (message) => {
+    const onError = (error) => {
         res.status(401).json({
             state: 'error',
-            message: message
+            message: error.message
         })
     }
 
@@ -24,25 +21,92 @@ const List = (req, res, next) => {
         })
     }
 
-    const Page = () => {
-        Schema.POST.Read.Page(data).then((req) => {
-            onResponse(req);
+    const Page = async () => {
+        let ListRequest = {};
+        await Schema.POST.Read.Page(data).then((req) => {
+            ListRequest = req;
         }).catch((err) => {
-            onError(err)
-        })
+            throw new Error(err);
+        });
 
         return ListRequest;
     }
 
     const RunCommand = async () => {
-        Page();
-    }
+        try {
+            let ListRequest = await Page();
+            
+            ListRequest.map(item => {
+                // 댓글 수 설정
+                if(typeof item.comment == 'object'){
+                    try{
+                        if(typeof item.comment[0].count == 'number'){
+                            item.comment = item.comment[0].count;
+                        }else {
+                            item.comment = 0;
+                        }
+                    }catch(err){
+                        item.comment = 0;
+                    }
+                }else {
+                    item.comment = 0;
+                }
 
-    try{
-        RunCommand();
-    }catch(err){
-        console.log(err);
+
+                // 좋아요 눌렀는지 설정
+                if(typeof item.like_check == 'object'){
+                    try{
+                        if(typeof item.like_check[0].count == 'number'){
+                            item.like_check = true;
+                        }else {
+                            item.like_check = false;
+                        }
+                    }catch(err){
+                        item.like_check = false;
+                    }
+                }else {
+                    item.like_check = false;
+                }
+
+                // 좋아요 수 설정
+                if(typeof item.like_count == 'object'){
+                    try{
+                        if(typeof item.like_count[0].count == 'number'){
+                            item.like_count = item.like_count[0].count;
+                        }else {
+                            item.like_count = 0;
+                        }
+                    }catch(err){
+                        item.like_count = 0;
+                    }
+                }else {
+                    item.like_count = 0;
+                }
+
+                // 조회수 설정
+                if(typeof item.views_count == 'object'){
+                    try{
+                        if(typeof item.views_count[0].count == 'number'){
+                            item.views_count = item.views_count[0].count;
+                        }else {
+                            item.views_count = 0;
+                        }
+                    }catch(err){
+                        item.views_count = 0;
+                    }
+                }else {
+                    item.views_count = 0;
+                }
+            });
+
+            onResponse(ListRequest);
+        }catch(err){
+            console.log(err);
+            onError(err);
+        }
     }
+    RunCommand();
+
 
 }
 

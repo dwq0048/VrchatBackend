@@ -1,29 +1,11 @@
 const Schema = require('../../../../models/functions');
 
 const view = (req, res, next) => {
-    // Response Result
-    const onResponse = (payload, count) => {
-        res.status(200).json({
-            state : 'success',
-            payload,
-            count : count
-        });
-    }
-
-    const onError = (message) => {
-        res.status(401).json({
-            state : 'error',
-            message : message
-        });
-    }
-    // Response Result End
-
+    const onResponse = (payload) => { res.status(200).json({ state : 'success', payload }) };
+    const onError = (message) => { res.status(401).json({ state : 'error', message : message }) };
     
     const LocalPayload = res.locals.payload;
     const client = { host : req.ip || req.headers.host };
-
-    let ViewRequest = {};
-    let ViewCount = {};
     let data = { index: req.body.index, board: req.body.board, client : client.host };
 
     if(LocalPayload.status == 'success'){
@@ -32,47 +14,8 @@ const view = (req, res, next) => {
         data.user = undefined;
     }
 
-    const PostCount = async () => {
-        let object = { clients : undefined, users : undefined };
-        await Schema.POST.Read.LogFind(data).then((req) => {
-            if(typeof req == 'object'){
-                if(req.length <= 0){ PostLog() }
-                else{
-                    req.map(item => {
-                        if(item.type == 'clients'){ object.clients = item }
-                        else if(item.type == 'users'){ object.users = item }
-                    })
-                    
-                    if(typeof object.clients == undefined){ PostLog('client') }
-                    if(typeof object.users == undefined){
-                        if(data.user != undefined){ PostLog('user') }
-                    }
-                }
-            }
-        }).catch((error) => {
-            throw new Error(error.message);
-        });
-    };
-
-    const PostLog = async (count = undefined) => {
-        await Schema.POST.Write.PostLog(data, count).then((req) => {
-            console.log(req);
-        }).catch((error) => {
-            throw new Error(error.message)
-        });
-    };
-
-    const CountView = async () => {
-        await Schema.POST.Read.PostCount(data).then((req) => {
-            ViewCount = (req.length > 0) ? req[0].count : 0;
-        }).catch((error) => {
-            throw new Error(error.message);
-        });
-
-        return ViewCount;
-    }
-
     const PostView = async () => {
+        let ViewRequest = {};
         await Schema.POST.Read.View(data).then((req) => {
             ViewRequest = { status : true, payload : req }
         }).catch((error) => {
@@ -84,11 +27,70 @@ const view = (req, res, next) => {
 
     const RunCommand = async () => {
         try{
-            await PostCount();
-            const ResultCount = await CountView();
-            const ResultView = await PostView();
+            let ResultView = await PostView();
+            ResultView = ResultView.payload[0];
 
-            onResponse( ResultView.payload[0], ResultCount );
+            // 댓글 수 설정
+            if(typeof ResultView.comment == 'object'){
+                try{
+                    if(typeof ResultView.comment[0].count == 'number'){
+                        ResultView.comment = ResultView.comment[0].count;
+                    }else {
+                        ResultView.comment = 0;
+                    }
+                }catch(err){
+                    ResultView.comment = 0;
+                }
+            }else {
+                ResultView.comment = 0;
+            }
+            
+            // 좋아요 눌렀는지 설정
+            if(typeof ResultView.like_check == 'object'){
+                try{
+                    if(typeof ResultView.like_check[0].count == 'number'){
+                        ResultView.like_check = true;
+                    }else {
+                        ResultView.like_check = false;
+                    }
+                }catch(err){
+                    ResultView.like_check = false;
+                }
+            }else {
+                ResultView.like_check = false;
+            }
+
+            // 좋아요 수 설정
+            if(typeof ResultView.like_count == 'object'){
+                try{
+                    if(typeof ResultView.like_count[0].count == 'number'){
+                        ResultView.like_count = ResultView.like_count[0].count;
+                    }else {
+                        ResultView.like_count = 0;
+                    }
+                }catch(err){
+                    ResultView.like_count = 0;
+                }
+            }else {
+                ResultView.like_count = 0;
+            }
+
+            // 조회수 설정
+            if(typeof ResultView.views_count == 'object'){
+                try{
+                    if(typeof ResultView.views_count[0].count == 'number'){
+                        ResultView.views_count = ResultView.views_count[0].count;
+                    }else {
+                        ResultView.views_count = 0;
+                    }
+                }catch(err){
+                    ResultView.views_count = 0;
+                }
+            }else {
+                ResultView.views_count = 0;
+            }
+
+            onResponse( ResultView );
         } catch (error){
             console.log(error);
             onError(error.message);
