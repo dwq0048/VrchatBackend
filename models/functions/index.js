@@ -11,6 +11,26 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const POST = {
     Read : {
+        Find : () => {
+            return new Promise((resolve, reject) => {
+                try{
+                    Schema.POST.aggregate([
+                        {
+                            "$lookup" : {
+                                "from" : Schema.USER.collection.name,
+                                "localField" : "user",
+                                "foreignField" : "_id",
+                                "as" : "users"
+                            }
+                        },
+                    ], function(rr, ra){
+                        if(ra){ resolve(ra) }else{ resolve({ message : 'idk' }) }
+                    });
+                }catch(err){
+                    resolve(err);
+                }
+            });
+        },
         Page : (data) => {
             return new Promise((resolve, reject) => {
                 try{
@@ -122,10 +142,8 @@ const POST = {
                             }
                         },
                     ], function(rr,ra){
-                        if(ra){
-                            resolve(ra)
-                        }
-                    })
+                        if(ra){ resolve(ra) }else{ reject({ message : 'idk' }) }
+                    });
                 } catch(err){
                     reject(err)
                 }
@@ -231,9 +249,7 @@ const POST = {
                             }
                         },
                     ] , function(rr,ra){
-                        if(ra){
-                            resolve(ra);
-                        }
+                        if(ra){ resolve(ra) }else{ reject({ message : 'idk' }) }
                     })
                 } catch(err) {
                     reject(err);
@@ -257,7 +273,9 @@ const POST = {
                 try {
                     Schema.POST_LOG.aggregate([
                         { '$match' :  { 'index' : new ObjectId(data.index), type : 'like', "meta.user" : new ObjectId(data.user) } },
-                    ], function(rr, ra){ if(ra){ resolve(ra) } });
+                    ], function(rr, ra){
+                        if(ra){ resolve(ra) }else{ reject({ message : 'idk' }) }
+                    });
                 }catch(err){
                     reject(err);
                 }
@@ -352,6 +370,36 @@ const POST = {
 
 const COMMENT = {
     Read : {
+        Find : (data) => {
+            return new Promise((resolve, reject) => {
+                try{
+                    Schema.COMMENT.aggregate([
+                        {
+                            "$match" : { "_id" : new ObjectId(data) }
+                        },
+                        {
+                            "$limit" : 1
+                        },
+                        {
+                            "$lookup" : {
+                                "from" : Schema.USER.collection.name,
+                                "localField" : "user",
+                                "foreignField" : "_id",
+                                "as" : "users"
+                            }
+                        },
+                    ], function(rr, ra){
+                        if(ra){
+                            resolve(ra);   
+                        }else{
+                            reject({ message : 'idk' });
+                        }
+                    });
+                }catch(err){
+                    reject(err);
+                }
+            });
+        },
         List : (data) => {
             return new Promise((resolve, reject) => {
                 try{
@@ -375,7 +423,7 @@ const COMMENT = {
                                 "foreignField" : "_id",
                                 "as" : "users"
                             }
-                        }
+                        },
                     ], function(rr, ra){
                         if(ra){
                             resolve(ra);

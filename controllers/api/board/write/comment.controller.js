@@ -1,38 +1,7 @@
 const Schema = require('../../../../models/functions');
 
 const post = (req, res, next) => {
-
-    const payload = res.locals.payload;    
-    if(payload.status == 'fail'){
-        onError({ message: payload.message });
-
-        return;
-    }
-
-    const data = {
-        index: req.body.index,
-        board: req.body.board,
-        comment: req.body.comment
-    }
-
-    const object = {
-        _parent : data.index,
-        title : '',
-        board : data.board,
-        user : {
-            userid : payload.info.userid,
-            userKey : payload.info.index,
-            name : payload.info.name,
-            nickname : payload.info.nickname
-        },
-        type : {
-            state : 2,
-            password : '',
-            skin : ''
-        },
-        post : data.comment
-    }
-
+    // Response Result
     const response = (result) => {
         res.status(200).json({
             state : 'success',
@@ -46,12 +15,40 @@ const post = (req, res, next) => {
             message: err
         });
     }
+    // Response Result End
+
+    const LocalPayload = res.locals.payload;
+
+    const user  = {
+        index : LocalPayload.info.index,
+        userid : LocalPayload.info.userid,
+        access : LocalPayload.info.access
+    }
+
+    const data = {
+        index: req.body.index,
+        board: req.body.board,
+        comment: req.body.comment
+    }
+
+    const object = {
+        _parent : data.index,
+        title : '',
+        board : data.board,
+        user : user.index,
+        type : {
+            state : 2,
+            password : '',
+            skin : ''
+        },
+        post : data.comment
+    }
 
     const UploadComment = async () => {
         let payload = {};
 
         await Schema.COMMENT.Write.Create(object).then((req) => {
-            payload = req;
+            payload = req._id;
         }).catch((err) => {
             throw new Error(err.message)
         })

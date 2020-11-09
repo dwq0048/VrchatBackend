@@ -4,22 +4,16 @@ const Comment = (req, res, next) => {
     const data = {
         index: req.body.index,
         board: req.body.board,
-        page: req.body.page,
-        view: req.body.view
+        page: (typeof req.body.page == 'number') ? req.body.page : 0,
+        view: (typeof req.body.view == 'number') ? req.body.view : 15,
     }
 
     const onResponse = (payload) => {
-        res.status(200).json({
-            state : 'success',
-            payload
-        });
+        res.status(200).json({ state : 'success', payload });
     }
 
     const onError = (err) => {
-        res.status(200).json({
-            state : 'fail',
-            message: err.message
-        });
+        res.status(200).json({ state : 'fail', message: err.message });
     }
 
     const UpdatePost = async () => {
@@ -36,6 +30,9 @@ const Comment = (req, res, next) => {
     const RunCommand = async () => {
         try {
             let ResultComment = await UpdatePost();
+            ResultComment.map((item) => {
+                item.users = item.users[0];
+            });
             onResponse(ResultComment);
         }catch(err){
             onError(err);

@@ -79,14 +79,16 @@ mongoose.connect(config.DB.address, { useNewUrlParser: true, useUnifiedTopology:
 
 // Socket IO
 app.io.on('connection', function(socket){
-  const Schema = {
-    POST : require('./models/schema/post/post.js')
-  };
+  const Schema = require('./models/functions/index.js');
     
-  Schema.POST.find().then((req) => {
+  Schema.POST.Read.Find().then((req) => {
     for(let i=0; i<req.length; i++){
       socket.on(req[i]._id, function(payload){
-        app.io.emit(req[i]._id, payload);
+        Schema.COMMENT.Read.Find(payload.payload.data.result).then((item) => {
+          if(typeof item[0] == 'object'){
+            app.io.emit(req[i]._id, item[0]);
+          }
+        });
       });
     }
   })

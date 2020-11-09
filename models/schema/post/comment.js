@@ -6,12 +6,7 @@ const Comment = new mongoose.Schema({
     _parent : { type : mongoose.Schema.Types.ObjectId }, // 엄마
     title : { type : String }, // 제목
     board : { type : String }, // 게시판 종류
-    user : {
-        index : { type : String }, // 글쓴이 고유번호
-        userid : { type : String }, // 글쓴이 아이디
-        username : { type : String }, // 글쓴이 이름
-        nickname : { type : String }, // 글쓴이 닉네임
-    },
+    user : { type : mongoose.Schema.Types.ObjectId, ref: "User" },
     type : {
         state : { type : String }, // 상태
         // 1 : 게시중

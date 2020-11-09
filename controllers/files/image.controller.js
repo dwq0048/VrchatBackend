@@ -66,7 +66,7 @@ const image = (req, res, next) => {
     }
 
     const ViewImage = async () => {
-        await Schema.IMAGE.View(payload).then((req) => {
+        await Schema.IMAGE.Read.View(payload).then((req) => {
             ViewRequest = { status : true, payload : req };
         }).catch((error) => {
             throw new Error(error.message);
