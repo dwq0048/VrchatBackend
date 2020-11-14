@@ -329,7 +329,7 @@ const post = (req, res, next) => {
         try{
             Verification();
             const ResultPost = await InsertPost();
-            const ResultImage = await ImageLoader(user, ResultPost.payload._id, req.files);
+            const ResultImage = await ImageLoader(user, ResultPost.payload._id, req.files, data.meta);
 
             if(ResultPost.status && ResultImage.status){
                 const ResultUpdate = await UpdatePost(ResultPost.payload._id, ResultImage.list);

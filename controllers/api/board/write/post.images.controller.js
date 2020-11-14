@@ -8,7 +8,7 @@ const { promisify } = require('util');
 const sharp = require("sharp");
 const sizeOf = promisify(require('image-size'));
 
-const loader = async (user, index, files) => {
+const loader = async (user, index, files, meta) => {
     let images = [];
     const filePath = `${options.image.path.imgPath}/${Helper.NORMAL.formatDate(Date.now())}/fixed/`;
 
@@ -27,7 +27,15 @@ const loader = async (user, index, files) => {
             images[i].meta = { width : info.width, height : info.height, options : {} };
             images[i].user = user.index;
             images[i].info = {};
+
+            if(typeof meta.images[i] == 'object'){
+                if(typeof meta.images[i].index == 'string'){
+                    images[i].meta.index = meta.images[i].index;
+                }
+            }
         }
+
+        console.log(images);
     };
 
     const SharpImage = async () => {
