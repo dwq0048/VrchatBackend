@@ -1,10 +1,22 @@
 const Schema = require('../../../../models/functions');
 
 const List = (req, res, next) => {
-    const data = {
+    let data = {
         board: req.body.board,
         page: req.body.page,
         view: req.body.view
+    }
+
+    if(/^(\-|\+)?([0-9]+)$/.test( data.page ) && parseInt( data.page ) > 0){
+        data.page = Number(data.page);
+    }else{
+        data.page = 0;
+    }
+
+    if(/^(\-|\+)?([0-9]+)$/.test( data.view ) && parseInt( data.view ) > 0){
+        data.view = Number(data.view);
+    }else{
+        data.view = 15;
     }
 
     const onError = (error) => {
@@ -14,11 +26,25 @@ const List = (req, res, next) => {
         })
     }
 
-    const onResponse = (payload) => {
+    const onResponse = (payload, count) => {
         res.status(200).json({
             state: 'success',
-            payload
+            payload,
+            count
         })
+    }
+
+    const Count = async () => {
+        let AllCount = {};
+        await Schema.POST.Read.Count(data).then((req) => {
+            try {
+                AllCount = req[0].count;
+            }catch(err){
+                AllCount = 0;
+            }
+        });
+
+        return AllCount;
     }
 
     const Page = async () => {
@@ -34,6 +60,7 @@ const List = (req, res, next) => {
 
     const RunCommand = async () => {
         try {
+            let AllCount = await Count();
             let ListRequest = await Page();
             
             ListRequest.map(item => {
@@ -99,7 +126,7 @@ const List = (req, res, next) => {
                 }
             });
 
-            onResponse(ListRequest);
+            onResponse(ListRequest, AllCount);
         }catch(err){
             console.log(err);
             onError(err);

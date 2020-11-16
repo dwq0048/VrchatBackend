@@ -4,9 +4,12 @@ const Comment = (req, res, next) => {
     const data = {
         index: req.body.index,
         board: req.body.board,
-        page: (typeof req.body.page == 'number') ? req.body.page : 0,
-        view: (typeof req.body.view == 'number') ? req.body.view : 15,
+        list: (typeof req.body.list == 'number') ? req.body.list : 0,
+        view: (typeof req.body.view == 'number') ? req.body.view : 50,
     }
+
+    console.log(req.body.list);
+    console.log(data);
 
     const onResponse = (payload) => {
         res.status(200).json({ state : 'success', payload });

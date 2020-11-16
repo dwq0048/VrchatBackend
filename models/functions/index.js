@@ -31,6 +31,27 @@ const POST = {
                 }
             });
         },
+        Count : (data) => {
+            return new Promise((resolve, reject) => {
+                try{
+                    Schema.POST.aggregate([
+                        {
+                            "$match" : { "board" : data.board }
+                        },
+                        {
+                            "$group": { _id: null, count: { $sum: 1 } }
+                        },
+                        {
+                            "$project": { _id: 0 }
+                        }
+                    ],function(rr,ra){
+                        if(ra){ resolve(ra) }else{ reject({ message : 'idk' }) }
+                    });
+                }catch(err){
+                    reject(err);
+                }
+            });
+        },
         Page : (data) => {
             return new Promise((resolve, reject) => {
                 try{
@@ -42,10 +63,10 @@ const POST = {
                             "$sort" : { 'state.date_fix' : -1 }
                         },
                         {
-                            "$skip" : data.page
+                            "$skip" : (Number(data.page) * Number(data.view))
                         },
                         {
-                            "$limit" : data.view
+                            "$limit" : Number(data.view)
                         },
                         {
                             "$lookup" : {
@@ -411,7 +432,7 @@ const COMMENT = {
                             "$sort" : { 'state.date_fix' : -1 }
                         },
                         {
-                            "$skip" : data.page
+                            "$skip" : data.list
                         },
                         {
                             "$limit" : data.view
