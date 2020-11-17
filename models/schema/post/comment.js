@@ -20,8 +20,8 @@ const Comment = new mongoose.Schema({
         password : { type : String }, // 비밀번호가 있다면 비밀번호
     },
     state : {
-        date : { type : String, default : Date }, // 글쓴 날짜
-        date_fix : { type : String, default: Date }, // 수정 날짜
+        date : { type : Date, default : Date.now }, // 글쓴 날짜
+        date_fix : { type : Date, default: Date.now }, // 수정 날짜
     },
     images : [],
     files: [],

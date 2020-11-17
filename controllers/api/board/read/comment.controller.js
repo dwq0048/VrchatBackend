@@ -2,14 +2,11 @@ const Schema = require('../../../../models/functions');
 
 const Comment = (req, res, next) => {
     const data = {
-        index: req.body.index,
+        index: (typeof req.body.index == 'string') ? req.body.index : false,
         board: req.body.board,
-        list: (typeof req.body.list == 'number') ? req.body.list : 0,
-        view: (typeof req.body.view == 'number') ? req.body.view : 50,
+        limit: (typeof req.body.limit == 'number') ? req.body.limit : 50,
+        last: (typeof req.body.last == 'object') ? req.body.last : false
     }
-
-    console.log(req.body.list);
-    console.log(data);
 
     const onResponse = (payload) => {
         res.status(200).json({ state : 'success', payload });

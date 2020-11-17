@@ -422,20 +422,31 @@ const COMMENT = {
             });
         },
         List : (data) => {
+           let MatchObject = {
+                "$match" : {
+                    "$and" : [
+                        { "_parent" : (typeof data.index == 'string') ? new ObjectId(data.index) : 0 }
+                    ]
+                }
+            }
+
+            if(data.last){
+                if(typeof data.last.index == 'string' && typeof data.last.date == 'string'){
+                    MatchObject.$match.$and.push({ "state.date" : { "$lt" : new Date(data.last.date) } });
+                }
+            }
+
+            console.log(MatchObject.$match.$and);
+    
             return new Promise((resolve, reject) => {
                 try{
                     Schema.COMMENT.aggregate([
+                        MatchObject,
                         {
-                            "$match" : { "_parent" : new ObjectId(data.index) }
+                            "$sort" : { 'state.date' : -1 }
                         },
                         {
-                            "$sort" : { 'state.date_fix' : -1 }
-                        },
-                        {
-                            "$skip" : data.list
-                        },
-                        {
-                            "$limit" : data.view
+                            "$limit" : data.limit
                         },
                         {
                             "$lookup" : {
@@ -447,6 +458,9 @@ const COMMENT = {
                         },
                     ], function(rr, ra){
                         if(ra){
+                            if(data.last){
+                                console.log(ra);
+                            }
                             resolve(ra);
                         }
                     });
