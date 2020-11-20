@@ -435,8 +435,6 @@ const COMMENT = {
                     MatchObject.$match.$and.push({ "state.date" : { "$lt" : new Date(data.last.date) } });
                 }
             }
-
-            console.log(MatchObject.$match.$and);
     
             return new Promise((resolve, reject) => {
                 try{
