@@ -28,6 +28,8 @@ const loader = async (user, index, files, meta) => {
             images[i].user = user.index;
             images[i].info = {};
 
+            console.log(meta);
+
             if(typeof meta.images[i] == 'object'){
                 if(typeof meta.images[i].index == 'string'){
                     images[i].meta.index = meta.images[i].index;

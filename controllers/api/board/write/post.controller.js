@@ -316,6 +316,8 @@ const post = (req, res, next) => {
             image : image
         };
 
+        console.log(data);
+
         await Schema.POST.Write.Update(data).then((req) => {
             UpdateRequest = { status : true, payload : req }
         }).catch((error) => {
