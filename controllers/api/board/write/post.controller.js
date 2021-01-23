@@ -26,16 +26,18 @@ const post = (req, res, next) => {
         index : LocalPayload.info.index,
         userid : LocalPayload.info.userid,
         access : LocalPayload.info.access
-    }
+    };
 
     let data = {
         board : req.body.board,
         title : req.body.title,
         content : req.body.content,
         meta : req.body.meta
-    }
+    };
 
-    try{ data.meta = JSON.parse(data.meta) }catch(err){ onError('The meta is damaged') }
+    try{ data.meta = JSON.parse(data.meta) }catch(err){ onError('The meta is damaged') };
+
+    console.log(data.meta);
 
     let RequestData = {
         title : '',
@@ -128,6 +130,7 @@ const post = (req, res, next) => {
                     openSetting : ['search', 'anonymous', 'private'],
                     mod : ['horizontal', 'vertical'],
                     hash : { leng : 30, size: 30, setting: 1 },
+                    thumbnail : {}
                 },
             }
         }
@@ -272,6 +275,14 @@ const post = (req, res, next) => {
                 }
                 // 그외는 나중에 하셈
             }
+            
+            // 썸네일 조회
+            if(typeof filter.thumbnail == 'object'){
+                if(!typeof data.meta.thumbnail == 'number'){
+                    throw new Error('The thumbnail typeof not number');
+                }
+            }
+
         }else{
             throw new Error('The meta object does not exist');
         }
@@ -315,8 +326,6 @@ const post = (req, res, next) => {
             index : index,
             image : image
         };
-
-        console.log(data);
 
         await Schema.POST.Write.Update(data).then((req) => {
             UpdateRequest = { status : true, payload : req }

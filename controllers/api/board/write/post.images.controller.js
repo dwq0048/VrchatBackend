@@ -27,17 +27,15 @@ const loader = async (user, index, files, meta) => {
             images[i].meta = { width : info.width, height : info.height, options : {} };
             images[i].user = user.index;
             images[i].info = {};
-
-            console.log(meta);
-
-            if(typeof meta.images[i] == 'object'){
-                if(typeof meta.images[i].index == 'string'){
-                    images[i].meta.index = meta.images[i].index;
+            
+            if(typeof meta.images == 'object'){            
+                if(typeof meta.images[i] == 'object'){
+                    if(typeof meta.images[i].index == 'string'){
+                        images[i].meta.index = meta.images[i].index;
+                    }
                 }
             }
         }
-
-        console.log(images);
     };
 
     const SharpImage = async () => {
