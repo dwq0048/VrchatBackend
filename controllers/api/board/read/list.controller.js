@@ -4,7 +4,12 @@ const List = (req, res, next) => {
     let data = {
         board: req.body.board,
         page: req.body.page,
-        view: req.body.view
+        view: req.body.view,
+        user: req.body.user
+    }
+
+    if(data.user == undefined || data.user == ''){
+        data.user = undefined;
     }
 
     if(/^(\-|\+)?([0-9]+)$/.test( data.page ) && parseInt( data.page ) > 0){

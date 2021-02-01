@@ -53,116 +53,125 @@ const POST = {
             });
         },
         Page : (data) => {
+            let object = [
+                {
+                    "$sort" : { 'state.date_fix' : -1 }
+                },
+                {
+                    "$skip" : (Number(data.page) * Number(data.view))
+                },
+                {
+                    "$limit" : Number(data.view)
+                },
+                {
+                    "$lookup" : {
+                        "from" : Schema.USER.collection.name,
+                        "localField" : "user",
+                        "foreignField" : "_id",
+                        "as" : "users"
+                    }
+                },
+                {
+                    "$lookup" : {
+                        "from" : Schema.IMAGE.collection.name,
+                        "localField" : "images",
+                        "foreignField" : "_id",
+                        "as" : "ImageMeta"
+                    }
+                },
+                {
+                    "$lookup" : {
+                        "from" : Schema.COMMENT.collection.name,
+                        "let" : {
+                            "index" : "$_id"
+                        },
+                        "pipeline" : [
+                            {
+                                "$match" : {
+                                    "$expr" : {
+                                        "$and" : [
+                                            { "$eq" : [ "$_parent", "$$index" ] }
+                                        ]
+                                    }
+                                },
+                            },
+                            { "$group" : { _id: null, count: { $sum: 1 } } }
+                        ],
+                        "as" : "comment"
+                    },
+                },
+                {
+                    "$lookup" : {
+                        "from" : Schema.POST_LOG.collection.name,
+                        "let" : { "index" : "$_id" },
+                        "pipeline" : [
+                            {
+                                "$match" : {
+                                    "$and" : [
+                                        { "$expr" : { "$eq" : [ "$index", "$$index" ] } },
+                                        { "type" : 'like' },
+                                        { "meta.state" : true },
+                                        { "meta.user" : new ObjectId(data.user) },
+                                    ]
+                                }
+                            },
+                            { "$group" : { _id: null, count: { $sum: 1 } } }
+                        ],
+                        "as" : "like_check"
+                    }
+                },
+                {
+                    "$lookup" : {
+                        "from" : Schema.POST_LOG.collection.name,
+                        "let" : { "index" : "$_id" },
+                        "pipeline" : [
+                            {
+                                "$match" : {
+                                    "$and" : [
+                                        { "$expr" : { "$eq" : [ "$index", "$$index" ] } },
+                                        { "type" : 'like' },
+                                        { "meta.state" : true },
+                                    ]
+                                }
+                            },
+                            { "$group" : { _id: null, count: { $sum: 1 } } }
+                        ],
+                        "as" : "like_count"
+                    }
+                },
+                {
+                    "$lookup" : {
+                        "from" : Schema.POST_LOG.collection.name,
+                        "let" : { "index" : "$_id" },
+                        "pipeline" : [
+                            {
+                                "$match" : {
+                                    "$and" : [
+                                        { "$expr" : { "$eq" : [ "$index", "$$index" ] } },
+                                        { "type" : 'views' },
+                                    ]
+                                }
+                            },
+                            { "$group" : { _id: null, count: { $sum: 1 } } }
+                        ],
+                        "as" : "views_count"
+                    }
+                },
+            ];
+
+            if(typeof data.board == 'string'){
+                object.unshift({ "$match" : { "board" : data.board } });
+            }else{
+                if(data.user != undefined){
+                    object.unshift({ "$match" : { "user" : new ObjectId(data.user) } });
+                }
+            }
+
+            console.log(object);
+
             return new Promise((resolve, reject) => {
                 try{
-                    Schema.POST.aggregate([
-                        {
-                            "$match" : { "board" : data.board }
-                        },
-                        {
-                            "$sort" : { 'state.date_fix' : -1 }
-                        },
-                        {
-                            "$skip" : (Number(data.page) * Number(data.view))
-                        },
-                        {
-                            "$limit" : Number(data.view)
-                        },
-                        {
-                            "$lookup" : {
-                                "from" : Schema.USER.collection.name,
-                                "localField" : "user",
-                                "foreignField" : "_id",
-                                "as" : "users"
-                            }
-                        },
-                        {
-                            "$lookup" : {
-                                "from" : Schema.IMAGE.collection.name,
-                                "localField" : "images",
-                                "foreignField" : "_id",
-                                "as" : "ImageMeta"
-                            }
-                        },
-                        {
-                            "$lookup" : {
-                                "from" : Schema.COMMENT.collection.name,
-                                "let" : {
-                                    "index" : "$_id"
-                                },
-                                "pipeline" : [
-                                    {
-                                        "$match" : {
-                                            "$expr" : {
-                                                "$and" : [
-                                                    { "$eq" : [ "$_parent", "$$index" ] }
-                                                ]
-                                            }
-                                        },
-                                    },
-                                    { "$group" : { _id: null, count: { $sum: 1 } } }
-                                ],
-                                "as" : "comment"
-                            },
-                        },
-                        {
-                            "$lookup" : {
-                                "from" : Schema.POST_LOG.collection.name,
-                                "let" : { "index" : "$_id" },
-                                "pipeline" : [
-                                    {
-                                        "$match" : {
-                                            "$and" : [
-                                                { "$expr" : { "$eq" : [ "$index", "$$index" ] } },
-                                                { "type" : 'like' },
-                                                { "meta.state" : true },
-                                                { "meta.user" : new ObjectId(data.user) },
-                                            ]
-                                        }
-                                    },
-                                    { "$group" : { _id: null, count: { $sum: 1 } } }
-                                ],
-                                "as" : "like_check"
-                            }
-                        },
-                        {
-                            "$lookup" : {
-                                "from" : Schema.POST_LOG.collection.name,
-                                "let" : { "index" : "$_id" },
-                                "pipeline" : [
-                                    {
-                                        "$match" : {
-                                            "$and" : [
-                                                { "$expr" : { "$eq" : [ "$index", "$$index" ] } },
-                                                { "type" : 'like' },
-                                                { "meta.state" : true },
-                                            ]
-                                        }
-                                    },
-                                    { "$group" : { _id: null, count: { $sum: 1 } } }
-                                ],
-                                "as" : "like_count"
-                            }
-                        },
-                        {
-                            "$lookup" : {
-                                "from" : Schema.POST_LOG.collection.name,
-                                "let" : { "index" : "$_id" },
-                                "pipeline" : [
-                                    {
-                                        "$match" : {
-                                            "$and" : [
-                                                { "$expr" : { "$eq" : [ "$index", "$$index" ] } },
-                                                { "type" : 'views' },
-                                            ]
-                                        }
-                                    },
-                                    { "$group" : { _id: null, count: { $sum: 1 } } }
-                                ],
-                                "as" : "views_count"
-                            }
-                        },
-                    ], function(rr,ra){
+                    Schema.POST.aggregate(object, function(rr,ra){
                         if(ra){ resolve(ra) }else{ reject({ message : 'idk' }) }
                     });
                 } catch(err){
