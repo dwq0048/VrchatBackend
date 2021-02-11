@@ -2,23 +2,35 @@ const Schema = {
     USER : require('../../../models/schema/user/user')
 }
 
-const Join = (req, res, next) => {
-    const payload = req.body;
-    
-    Schema.USER.findOneByIndex(payload).then((req) => {
-        console.log(req);
+const Info = (req, res, next) => {
+    const onResponse = (payload) => {
+        res.status(200).json({ state : 'success', payload });
+    }
 
-        res.status(200).json({
-            status: 'success',
-            payload
-        });
-    }).catch((err) => {
-        res.status(401).json({
-            status: 'fail',
-            message: err.message
-        });
-    });
+    const onError = (err) => {
+        res.status(200).json({ state : 'fail', message: err.message });
+    }
+
+    const LocalPayload = res.locals.payload;
+
+    const user  = {
+        index : LocalPayload.info.index,
+        userid : LocalPayload.info.userid,
+        access : LocalPayload.info.access
+    };
+
+    console.log(user);
+    console.log(req.body);
+
+    const RunCommand = async () => {
+        try {
+            onResponse();
+        }catch(err){
+            onError(err);
+        }
+    }
+    RunCommand();
 
 }
 
-module.exports = Join;
+module.exports = Info;
