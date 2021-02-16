@@ -5,6 +5,6 @@ const Post = new mongoose.Schema({
     date : { type : Date , default : Date },
     type : { type : String },
     meta : { type : Object }
-}, { collection: 'bd_post_log', versionKey: false });
+}, { collection: 'bd_post_meta', versionKey: false });
 
-module.exports = mongoose.model('PostLog', Post, true);
+module.exports = mongoose.model('PostMeta', Post, true);

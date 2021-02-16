@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = {
     POST : require('../schema/post/post'),
-    POST_LOG : require('../schema/post/post.log'),
+    POST_META : require('../schema/post/post.meta'),
     COMMENT : require('../schema/post/comment'),
     USER : require('../schema/user/user'),
     IMAGE : require('../schema/file/image')
@@ -102,7 +102,7 @@ const POST = {
                 },
                 {
                     "$lookup" : {
-                        "from" : Schema.POST_LOG.collection.name,
+                        "from" : Schema.POST_META.collection.name,
                         "let" : { "index" : "$_id" },
                         "pipeline" : [
                             {
@@ -122,7 +122,7 @@ const POST = {
                 },
                 {
                     "$lookup" : {
-                        "from" : Schema.POST_LOG.collection.name,
+                        "from" : Schema.POST_META.collection.name,
                         "let" : { "index" : "$_id" },
                         "pipeline" : [
                             {
@@ -141,7 +141,7 @@ const POST = {
                 },
                 {
                     "$lookup" : {
-                        "from" : Schema.POST_LOG.collection.name,
+                        "from" : Schema.POST_META.collection.name,
                         "let" : { "index" : "$_id" },
                         "pipeline" : [
                             {
@@ -223,7 +223,7 @@ const POST = {
                         },
                         {
                             "$lookup" : {
-                                "from" : Schema.POST_LOG.collection.name,
+                                "from" : Schema.POST_META.collection.name,
                                 "let" : { "index" : "$_id" },
                                 "pipeline" : [
                                     {
@@ -243,7 +243,7 @@ const POST = {
                         },
                         {
                             "$lookup" : {
-                                "from" : Schema.POST_LOG.collection.name,
+                                "from" : Schema.POST_META.collection.name,
                                 "let" : { "index" : "$_id" },
                                 "pipeline" : [
                                     {
@@ -262,7 +262,7 @@ const POST = {
                         },
                         {
                             "$lookup" : {
-                                "from" : Schema.POST_LOG.collection.name,
+                                "from" : Schema.POST_META.collection.name,
                                 "let" : { "index" : "$_id" },
                                 "pipeline" : [
                                     {
@@ -288,7 +288,7 @@ const POST = {
         },
         LogFind : (data) => {
             return new Promise((resolve, reject) => {
-                Schema.POST_LOG.find({ $or : [
+                Schema.POST_META.find({ $or : [
                     { index : data.index, type : 'clients', 'meta.client' : data.client },
                     { index : data.index, type : 'users', 'meta.user' : data.user }
                 ]}).then((req) => {
@@ -301,7 +301,7 @@ const POST = {
         PostLike : (data) => {
             return new Promise((resolve, reject) => {
                 try {
-                    Schema.POST_LOG.aggregate([
+                    Schema.POST_META.aggregate([
                         { '$match' :  { 'index' : new ObjectId(data.index), type : 'like', "meta.user" : new ObjectId(data.user) } },
                     ], function(rr, ra){
                         if(ra){ resolve(ra) }else{ reject({ message : 'idk' }) }
@@ -364,12 +364,12 @@ const POST = {
             const options = { upsert : true, new : true };
 
             return new Promise((resolve, reject) => {
-                Schema.POST_LOG.findOneAndUpdate(filter, update, options).then((req) => {
+                Schema.POST_META.findOneAndUpdate(filter, update, options).then((req) => {
                     const FindFilter = { _id : new ObjectId(req._id) };
                     const FindUpdate = { $addToSet : meta, $setOnInsert: { date: new Date() } };
                     const FindOptions = { upsert : true, new : true };
 
-                    Schema.POST_LOG.findOneAndUpdate(FindFilter, FindUpdate, FindOptions).then((req) => {
+                    Schema.POST_META.findOneAndUpdate(FindFilter, FindUpdate, FindOptions).then((req) => {
                         resolve(req);
                     }).catch((err) => {
                         reject(err);
@@ -388,7 +388,7 @@ const POST = {
             const options = { upsert : true, new : true };
 
             return new Promise((resolve, reject) => {
-                Schema.POST_LOG.findOneAndUpdate(filter, update, options).then((req) => {
+                Schema.POST_META.findOneAndUpdate(filter, update, options).then((req) => {
                     resolve(req);
                 }).catch((err) => {
                     reject(err);

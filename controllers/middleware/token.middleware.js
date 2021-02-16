@@ -102,6 +102,7 @@ const token = (req, res, next) => {
                 info : {
                     index : user._id,
                     userid : user.userid,
+                    nickname : user.nickname,
                     access : {
                         auth: user.info.auth,
                         rank: user.info.rank,
@@ -133,14 +134,13 @@ const token = (req, res, next) => {
                 info : {
                     index : user._id,
                     userid : user.userid,
-                    name: user.name,
-                    nickname: user.nickname,
-                    email: user.email,
+                    nickname : user.nickname,
                     access : {
-                        auth: user.meta.auth,
-                        rank: user.meta.rank,
-                        point: user.meta.point,
-                        check: user.meta.check
+                        auth: user.info.auth,
+                        rank: user.info.rank,
+                        point: user.info.point,
+                        check: user.info.check,
+                        experience: user.info.experience
                     }
                 }
             };

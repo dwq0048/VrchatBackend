@@ -12,6 +12,7 @@ router.post('/token', Middleware.TOKEN, require('../../../controllers/api/auth/t
 
 router.post('/info', Middleware.TOKEN, require('../../../controllers/api/auth/info.controller'));
 
-//router.post('/info', require('../../../controllers/api/auth/info.controller'));
+// write
+router.post('/write/setting/profile', Middleware.TOKEN, require('../../../controllers/api/auth/write/setting/profile.controller'));
 
 module.exports = router;
