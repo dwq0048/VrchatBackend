@@ -167,8 +167,6 @@ const POST = {
                 }
             }
 
-            console.log(object);
-
             return new Promise((resolve, reject) => {
                 try{
                     Schema.POST.aggregate(object, function(rr,ra){

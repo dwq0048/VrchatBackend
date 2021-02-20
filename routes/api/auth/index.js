@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const upload = multer()
 
 const Middleware = {
 	TOKEN : require('../../../controllers/middleware/token.middleware'),
@@ -13,6 +15,8 @@ router.post('/token', Middleware.TOKEN, require('../../../controllers/api/auth/t
 router.post('/info', Middleware.TOKEN, require('../../../controllers/api/auth/info.controller'));
 
 // write
-router.post('/write/setting/profile', Middleware.TOKEN, require('../../../controllers/api/auth/write/setting/profile.controller'));
+router.post('/write/setting/profile', upload.array(), Middleware.TOKEN, require('../../../controllers/api/auth/write/setting/profile.controller'));
+
+// upload.array() => just use form-data
 
 module.exports = router;

@@ -20,6 +20,8 @@ const post = (req, res, next) => {
     }
     // Response Result End
 
+    console.log('run');
+
     const LocalPayload = res.locals.payload;
 
     const user  = {
