@@ -51,6 +51,12 @@ app.use('/api/1/auth', authRouter);
 app.use('/api/1/board', boardRouter);
 app.use('/images/', imageRouter);
 
+// Run MiddleWare
+// const Middleware = {
+//    uploads : require(./models/middleware.js)
+// }
+// app.use(Middleware.uploads())
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

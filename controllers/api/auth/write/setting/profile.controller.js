@@ -15,16 +15,8 @@ const Profile = (req, res, next) => {
         access : LocalPayload.info.access
     };
 
-    /*
-    let data = {
-        board : req.body.board,
-        title : req.body.title,
-        content : req.body.content,
-        meta : req.body.meta
-    };
-    */
-
     console.log(req.body);
+    console.log(req.file);
 
     const RunCommand = async () => {
         try {

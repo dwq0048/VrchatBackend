@@ -1,30 +1,37 @@
-const config = {
+let config = {
     db : {
-        address : 'mongodb://127.0.0.1:27017/backend'
+        type : 'mongodb',
+        address : '127.0.0.1',
+        port : '27017',
+        collection : 'backend',
     },
     jwt : {
         secret : 'luochi',
         ReSecret : 'reluochi'
     },
-    image : {
-        path : {
-            upload : './public/uploads',
-            images : '/images',
-            imgPath : ''
-        },
+    upload : {
+        path : './public/uploads',
         option : {
-            resize : {
-                size : [ 480, 960, 1200 ]
+            post : {
+                upload : 'post',
+                resize : {
+                    size : [ 480, 960, 1200 ]
+                },
+                version : 'v0'
+            },
+            profile : {
+                uplaod : 'profile',
+                resize : {
+                    size : [ 480, 960, 1200 ]
+                },
+                version : 'v0'
             }
-        },
-        version : 'v0'
-    }
+        }
+    },
 };
-
-config.image.path.imgPath = config.image.path.upload + config.image.path.images;
 
 module.exports = {
     DB : config.db,
     JWT : config.jwt,
-    image : config.image
+    UPLOAD : config.upload
 };

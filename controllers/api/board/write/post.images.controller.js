@@ -10,7 +10,9 @@ const sizeOf = promisify(require('image-size'));
 
 const loader = async (user, index, files, meta) => {
     let images = [];
-    const filePath = `${options.image.path.imgPath}/${Helper.NORMAL.formatDate(Date.now())}/fixed/`;
+    const filePath = `${options.image.path.upload}/images/${Helper.NORMAL.formatDate(Date.now())}/fixed/`;
+
+    console.log(filePath);
 
     let Request = {};
 
