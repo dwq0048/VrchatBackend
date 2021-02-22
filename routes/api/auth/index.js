@@ -3,7 +3,7 @@ const router = express.Router();
 
 const Middleware = {
 	TOKEN : require('../../../controllers/middleware/token.middleware'),
-	IMAGES : require('../../../controllers/middleware/images.middleware'),
+	//IMAGES : require('../../../controllers/middleware/images.middleware'),
 }
 
 router.post('/login', require('../../../controllers/api/auth/login.controller'));

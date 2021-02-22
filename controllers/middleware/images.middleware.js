@@ -1,15 +1,11 @@
 const Schema = require('../../models/functions');
 const Helper = require('../../models/helper/index');
 const multer = require('multer');
-const fs = require('fs');
 
 const config = require('../../config/index.js');
 const options = config.image;
 
-const mkdir = ( dirPath ) => {
-    const isExists = fs.existsSync( dirPath );
-    if( !isExists ) { fs.mkdirSync( dirPath, { recursive: true } ) };
-}
+
 
 const images = async (req, res, next, location) => {
     const Today = Helper.NORMAL.formatDate(Date.now());

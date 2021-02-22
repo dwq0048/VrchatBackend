@@ -1,5 +1,7 @@
+const fs = require('fs');
+
 const NORMAL = {
-    formatDate : (date) => {
+    formatDate : ( date ) => {
         let d = new Date(date);
         let month = '' + (d.getMonth() + 1);
         let day = '' + d.getDate();
@@ -9,9 +11,11 @@ const NORMAL = {
         if (day.length < 2){ day = '0' + day };
     
         return [year, month].join('');
+    },
+    mkdir : ( dirPath ) => {
+        const isExists = fs.existsSync( dirPath );
+        if( !isExists ) { fs.mkdirSync( dirPath, { recursive: true } ) };
     }
 }
 
-module.exports = {
-    NORMAL
-}
+module.exports = { NORMAL }

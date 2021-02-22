@@ -14,6 +14,10 @@ var authRouter = require('./routes/api/auth');
 var boardRouter = require('./routes/api/board');
 var imageRouter = require('./routes/files');
 
+const Middleware = {
+  upload : require('./models/middleware/upload.middleware.js')
+}
+
 const { networkInterfaces } = require('os');
 
 const nets = networkInterfaces();
@@ -30,7 +34,7 @@ for (const name of Object.keys(nets)) {
 }
 results.push(protocal + '://' + '127.0.0.1' + ':' + ports);
 
-console.log(results);
+console.log(cors);
 
 app.use(cors({
   origin: results,
@@ -52,10 +56,10 @@ app.use('/api/1/board', boardRouter);
 app.use('/images/', imageRouter);
 
 // Run MiddleWare
-// const Middleware = {
-//    uploads : require(./models/middleware.js)
-// }
-// app.use(Middleware.uploads())
+app.use(Middleware.upload);
+app.use(function(req, res, next){
+  console.log('askdjalskjdlaksjdks');
+})
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -79,9 +83,10 @@ app.set('jwt-re-secret', config.JWT.ReSecret);
 
 // DB
 mongoose.Promise = global.Promise;
-mongoose.connect(config.DB.address, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
-  .then(() => console.log('Successfully connected to mongodb'))
-  .catch(e => console.error(e));
+mongoose.connect(
+  `${config.DB.type}://${config.DB.address}:${config.DB.port}/${config.DB.collection}`,
+  { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }
+).then(() => console.log('Successfully connected to mongodb')).catch((e) => console.error(e));
 
 // Socket IO
 app.io.on('connection', function(socket){
