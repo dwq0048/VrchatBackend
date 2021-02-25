@@ -1,45 +1,12 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var mongoose = require('mongoose');
-var cors = require('cors');
+const cookieParser = require('cookie-parser');
+const createError = require('http-errors');
+const express = require('express');
+const logger = require('morgan');
+const path = require('path');
+const app = express();
 
-var app = express();
-app.io = require('socket.io')();
-
-var config = require('./config/index');
-var authRouter = require('./routes/api/auth');
-var boardRouter = require('./routes/api/board');
-var imageRouter = require('./routes/files');
-
-const Middleware = {
-  upload : require('./models/middleware/upload.middleware.js')
-}
-
-const { networkInterfaces } = require('os');
-
-const nets = networkInterfaces();
-const results = [];
-const ports = 8080;
-const protocal = 'http';
-
-for (const name of Object.keys(nets)) {
-    for (const net of nets[name]) {
-        if (net.family === 'IPv4' && !net.internal) {
-          results.push(protocal + '://' + net.address + ':' + ports);
-        }
-    }
-}
-results.push(protocal + '://' + '127.0.0.1' + ':' + ports);
-
-console.log(cors);
-
-app.use(cors({
-  origin: results,
-  credentials: true
-}));
+const middleware = require('./models/middleware/index.js');
+middleware.app({ app : app });
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -51,15 +18,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/api/1/auth', authRouter);
-app.use('/api/1/board', boardRouter);
-app.use('/images/', imageRouter);
-
-// Run MiddleWare
-app.use(Middleware.upload);
-app.use(function(req, res, next){
-  console.log('askdjalskjdlaksjdks');
-})
+// router path setting
+app.use('/api/1/auth', require('./routes/api/auth'));
+app.use('/api/1/board', require('./routes/api/board'));
+app.use('/images/', require('./routes/files'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -75,34 +37,6 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
-});
-
-// JWT secret
-app.set('jwt-secret', config.JWT.secret);
-app.set('jwt-re-secret', config.JWT.ReSecret);
-
-// DB
-mongoose.Promise = global.Promise;
-mongoose.connect(
-  `${config.DB.type}://${config.DB.address}:${config.DB.port}/${config.DB.collection}`,
-  { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }
-).then(() => console.log('Successfully connected to mongodb')).catch((e) => console.error(e));
-
-// Socket IO
-app.io.on('connection', function(socket){
-  const Schema = require('./models/functions/index.js');
-    
-  Schema.POST.Read.Find().then((req) => {
-    for(let i=0; i<req.length; i++){
-      socket.on(req[i]._id, function(payload){
-        Schema.COMMENT.Read.Find(payload.payload.data.result).then((item) => {
-          if(typeof item[0] == 'object'){
-            app.io.emit(req[i]._id, item[0]);
-          }
-        });
-      });
-    }
-  })
 });
 
 // catch 404 and forward to error handler
