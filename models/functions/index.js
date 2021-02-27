@@ -4,6 +4,7 @@ const Schema = {
     POST_META : require('../schema/post/post.meta'),
     COMMENT : require('../schema/post/comment'),
     USER : require('../schema/user/user'),
+    USER_META : require('../schema/user/user.meta'),
     IMAGE : require('../schema/file/image')
 };
 
@@ -504,6 +505,20 @@ const COMMENT = {
     }
 }
 
+const PROFILE = {
+    Write : {
+        ProfileMeta : (data) => {
+            return new Promise((resolve, reject) => {
+                Schema.USER_META.insertMany(data).then((req) => {
+                    resolve(req);
+                }).catch((err) => {
+                    reject(err);
+                })
+            });
+        }
+    }
+}
+
 const IMAGE = {
     Read : {
         View : (data) => {
@@ -530,5 +545,5 @@ const IMAGE = {
 }
 
 module.exports = {
-    POST, IMAGE, COMMENT
+    POST, IMAGE, COMMENT, PROFILE,
 }
