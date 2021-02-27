@@ -1,5 +1,6 @@
 const Schema = require('../../models/functions');
 const Helper = require('../../models/helper/index');
+const Config = require('../../config/index.js');
 
 const fs = require('fs');
 const stream = require('stream');
@@ -21,46 +22,49 @@ const image = (req, res, next) => {
     }
     // Response Result End
 
-    const payload = {
-        index : req.params.id,
-        query : req.query
-    }
-    
-    const Path = `./public/uploads/images`;
+    const payload = { index : req.params.id, query : req.query }
     let ViewRequest = {};
+    let Path = false;
 
     const LoadUrl = async (data) => {
-        const ThisDay = Helper.NORMAL.formatDate(data.info.date);
+        const ThisDay = Helper.formatDate(data.info.date);
         let array = [];
         let Garbage = 0;
-        console.log(data);
         if(payload.query.resize){
             if(typeof data.meta == 'object'){
                 if(typeof data.meta.options == 'object'){
                     if(typeof data.meta.resize == 'array'){
                         data.options.resize.map(item => {
-                            if(item >= payload.query.resize){
-                                Garbage = item;
-                                return;
-                            }
+                            if(item >= payload.query.resize){ Garbage = item; return; }
                         });
                     }
                 }
             }
+
             if(Garbage != 0){
                 array.push('X'+payload.query.resize);
             }
         }
-        array = (array.length != 0) ? '_fixed+'+array.join('+') : '_original';
+
+        if(typeof data.info.path == 'string'){
+            Config.UPLOAD.type.map(item => {
+                (item == data.info.path) ? Path = data.info.path : undefined;
+            })
+        }
+
+        if(Path){
+            Path = Config.UPLOAD.path + '/' + Path;
+        }else{
+            throw new Error({ message : 'There is no path in the DB' });
+        }
+
+        // 이미지 수정본 있을경우
+        array = (array.length != 0) ? '_fixed+'+array.join('+') : '_resize';
         const Loader = `${Path}/${ThisDay}/fixed/${data.filename}${array}`;
 
         const r = fs.createReadStream(Loader);
         const ps = new stream.PassThrough();
-        stream.pipeline(r, ps, (err) => {
-            if (err) {
-                onError(err);
-            }
-        });
+        stream.pipeline(r, ps, (err) => { (err) ? onError(err) : undefined });
     
         ps.pipe(res);
     }
@@ -128,8 +132,6 @@ const image_temp = (req, res, next) => {
                 }
             }
         }
-
-        console.log(url());
 
         const r = fs.createReadStream(url());
         const ps = new stream.PassThrough();

@@ -1,25 +1,24 @@
 const Schema = require('../../../../models/functions');
 const Helper = require('../../../../models/helper/index');
-
-const config = require('../../../../config/index.js');
-const options = { image : config.image };
+const Config = require('../../../../config/index.js');
 
 const { promisify } = require('util');
-const sharp = require("sharp");
 const sizeOf = promisify(require('image-size'));
+const sharp = require("sharp");
 
 const loader = async (user, index, files, meta) => {
     let images = [];
-    const filePath = `${options.image.path.upload}/images/${Helper.NORMAL.formatDate(Date.now())}/fixed/`;
-
-    console.log(filePath);
-
     let Request = {};
+    const Today = Helper.formatDate(Date.now());
+    const filePath = `${Config.UPLOAD.path}/${Config.UPLOAD.option.post.upload}/${Today}`;
+        
+    // if you upload express disk
+    await Helper.mkdir(`${filePath}`);
+    await Helper.mkdir(`${filePath}/fixed`);
+    await Helper.mkdir(`${filePath}/original`);
 
     for(let i=0;i<files.length;i++){
-        if(files[i].fieldname == 'images'){
-            images.push(files[i]);
-        }
+        if(files[i].fieldname == 'images'){ images.push(files[i]) };
     }
 
     const GetImage = async () => {
@@ -28,7 +27,7 @@ const loader = async (user, index, files, meta) => {
 
             images[i].meta = { width : info.width, height : info.height, options : {} };
             images[i].user = user.index;
-            images[i].info = {};
+            images[i].info = { path : 'post' };
             
             if(typeof meta.images == 'object'){            
                 if(typeof meta.images[i] == 'object'){
@@ -48,18 +47,23 @@ const loader = async (user, index, files, meta) => {
     }
 
     const Original = async (index) => {
+        await sharp(images[index].path).metadata().then(() => {
+            const ReFile = filePath + `/original/${images[index].filename}`;
+            return sharp(images[index].path).toFile( ReFile );
+        });
+
         sharp(images[index].path).metadata().then(info => {
             const width = Math.round(info.width);
             const height = Math.round(info.height);
 
-            const ReFile = filePath + `${images[index].filename}_original`;
+            const ReFile = filePath + `/fixed/${images[index].filename}_resize`;
             return sharp(images[index].path).resize({width: width, height: height}).toFile( ReFile );
         });
     }
 
     const Resize = async (index) => {
         images[index].meta.options.resize = [];
-        const Size = options.image.option.resize.size;
+        const Size = Config.UPLOAD.option.post.resize.size;
         for(let i=0; i<Size.length; i++){
             await sharp(images[index].path).metadata().then(info => {
                 if(info.width >= Size[i]){
@@ -76,6 +80,12 @@ const loader = async (user, index, files, meta) => {
     }
 
     const InsertImage = async () => {
+        String.prototype.replaceAll = function(org, dest) { return this.split(org).join(dest) };
+        images.map(item => {
+            (typeof item.destination == 'string') ? item.destination = filePath : undefined;
+            (typeof item.path == 'string') ? item.path = (`${filePath}/original/${item.filename}`).replaceAll("/","\\").replace(/^\.\\/, "") : undefined;
+        });
+
         await Schema.IMAGE.Write.InsertToo(images).then((req) => {
             try {
                 Request.list = [];

@@ -1,9 +1,9 @@
 const Schema = require('../../../../models/functions');
-const ImageLoader = require('./post.images.controller');
 const sanitizeHtml = require('sanitize-html');
+const ImageLoader = require('./post.images.controller');
 
 
-const post = (req, res, next) => {
+const post = async (req, res, next) => {
     // Response Result
     const onResponse = (payload) => {
         res.status(200).json({
@@ -19,9 +19,6 @@ const post = (req, res, next) => {
         });
     }
     // Response Result End
-
-    console.log('run');
-
     const LocalPayload = res.locals.payload;
 
     const user  = {
@@ -39,16 +36,9 @@ const post = (req, res, next) => {
 
     try{ data.meta = JSON.parse(data.meta) }catch(err){ onError('The meta is damaged') };
 
-    console.log(data.meta);
-
-    let RequestData = {
-        title : '',
-        content : ''
-    }
-
+    let RequestData = { title : '', content : '' };
     let Request = {};
     let UpdateRequest = {};
-
 
     // Setting Option
     const AllowedTags = {
@@ -76,6 +66,7 @@ const post = (req, res, next) => {
         },
     }
     // Setting Option End
+
     const VerifiJson = {
         notice : {
             auth : [1],

@@ -3,7 +3,7 @@ const router = express.Router();
 
 const Middleware = {
 	TOKEN : require('../../../controllers/middleware/token.middleware'),
-	//IMAGES : require('../../../controllers/middleware/images.middleware'),
+	IMAGES : require('../../../controllers/middleware/images.middleware'),
 }
 
 router.post('/login', require('../../../controllers/api/auth/login.controller'));
@@ -14,7 +14,7 @@ router.post('/token', Middleware.TOKEN, require('../../../controllers/api/auth/t
 router.post('/info', Middleware.TOKEN, require('../../../controllers/api/auth/info.controller'));
 
 // write
-//router.post('/write/setting/profile', Middleware.TOKEN, Middleware.IMAGES.PROFILE, require('../../../controllers/api/auth/write/setting/profile.controller'));
+router.post('/write/setting/profile', Middleware.TOKEN, Middleware.IMAGES({ path : 'profile', name : 'images', file : { type : 'array' } }), require('../../../controllers/api/auth/write/setting/profile.controller'));
 
 // upload.array() => just use form-data
 

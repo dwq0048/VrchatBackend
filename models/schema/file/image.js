@@ -11,10 +11,10 @@ const Image = new mongoose.Schema({
     size : { type : String }, // 기본 정보
     user : { type : mongoose.Schema.Types.ObjectId },
     info : {
-        ip : { type : String }, // 아이피
+        ip : { type : String }, // 아이피 (아직 안함)
         date : { type : String, default: Date }, // 업로드 날짜
-        postPath : { type : String },    // 업로드 했던곳
-        userAgent : { type : String }, // user-agent
+        path : { type : String },    // 업로드 했던곳 
+        userAgent : { type : String }, // user-agent (아직 안함)
         state : { type : String, default: 1 }, // 상태
         // 1 : 게시중
         // 2 : 사용하지 않음

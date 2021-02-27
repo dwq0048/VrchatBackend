@@ -11,6 +11,7 @@ let config = {
     },
     upload : {
         path : './public/uploads',
+        type : ['post','profile'],
         option : {
             post : {
                 upload : 'post',
@@ -20,7 +21,7 @@ let config = {
                 version : 'v0'
             },
             profile : {
-                uplaod : 'profile',
+                upload : 'profile',
                 resize : {
                     size : [ 480, 960, 1200 ]
                 },
