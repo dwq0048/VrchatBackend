@@ -1,4 +1,5 @@
-const Schema = require('../../../../models/functions');
+const Schema = require('../../../../../models/functions');
+const LoadImage = require('./profile.image.controller.js');
 
 const Profile = (req, res, next) => {
     const onResponse = (payload) => {
@@ -26,7 +27,7 @@ const Profile = (req, res, next) => {
     try{ data.meta = JSON.parse(data.meta) }catch(err){ onError('The meta is damaged') };
 
     let Enable = {
-        image : {
+        thumbnail : {
             change: false
         },
         nickname : {
@@ -42,7 +43,7 @@ const Profile = (req, res, next) => {
             auth : [1],
             verification : {
                 1 : {
-                    image : {},
+                    thumbnail : {},
                     nickname : {
                         // 1초 = 1
                         // 1분 = 1 * 60
@@ -75,14 +76,14 @@ const Profile = (req, res, next) => {
         const auth = VerifiAuth();
         if(typeof VerifiJson['profile'].verification[auth] == 'object'){
             // 이미지 변경 권한
-            if(typeof data.meta.image == 'object'){
-                if(typeof data.meta.image.change == 'boolean' || typeof data.meta.image.change == 'string'){
-                    if(data.meta.image.change == true){
-                        if(typeof VerifiJson['profile'].verification[auth].image){
+            if(typeof data.meta.thumbnail == 'object'){
+                if(typeof data.meta.thumbnail.change == 'boolean' || typeof data.meta.thumbnail.change == 'string'){
+                    if(data.meta.thumbnail.change == true){
+                        if(typeof VerifiJson['profile'].verification[auth].thumbnail){
                             // 이미지 변경 가능
-                            console.log('Enable Image');
+                            //console.log('Enable Thumbnail');
 
-                            Enable.image.change = true
+                            Enable.thumbnail.change = true
                         }
                     }
                 }
@@ -96,7 +97,7 @@ const Profile = (req, res, next) => {
                             if(typeof VerifiJson['profile'].verification[auth].nickname.time == 'string' || typeof VerifiJson['profile'].verification[auth].nickname.time == 'number'){
                                 // 시간 조회 => 나중에
                                 // 중복 조회
-                                console.log('Enable Nickname');
+                                //console.log('Enable Nickname');
 
                                 Enable.nickname.change = true
                             }
@@ -111,7 +112,7 @@ const Profile = (req, res, next) => {
                     if(data.meta.description.change == true){
                         if(typeof VerifiJson['profile'].verification[auth].description == 'object'){
                             // 테그 권한 부여
-                            console.log('Enable Description');
+                            //console.log('Enable Description');
 
                             Enable.description.change = true
                         }
@@ -125,88 +126,87 @@ const Profile = (req, res, next) => {
         }
     }
 
-    const Technology = () => {
+    const Technology = async () => {
         // 이미지 변경 가능
-        if(Enable.image.change){
-            // const LoadImage = require('./profile.image.controller.js');
-            // Images DB 업로드 및 Profile에 Insert?
-            // RequestData.image = {
-            //      options??????
-            // }
+        if(Enable.thumbnail.change){
+            const temp = await LoadImage(user, 0, req.files, data.meta);
+            console.log(temp);
         }
 
         // 닉네임 변경 가능
         if(Enable.nickname.change){
-            // RequestData.nickname = [[ 변경한 닉네임 ]]
+             RequestData.nickname = data.nickname;
         }
 
         // 설명글 변경 가능
         if(Enable.description.change){
-            // RequestData.description == [[ 변경한 설명글 ]]
+            RequestData.description = data.description;
         }
         
         return RequestData;
     };
 
-    const InsertPost = () => {
-        // 스키마 제작
-        // InsertMany ?? create??
-        const array = [
-            // Profile Thumbnail
-            {
-                index : { }, // Post User Primary Key,
-                // Default of Date
-                type : 'thumbnail',
-                meta : {
-                    thumbnail : {
-                        index : { }, // Images Primary Key
-                    }
-                }
-            },
-            // Profile Nickname
-            {
-                index : { }, // Post User Primary Key,
-                type : 'nickname',
-                meta : {
-                    nickname : '닉네임' // Change of nickname
-                }
-            },
-            // Profile Description
-            {
-                index : { }, // Post User Primary Key,
-                type : 'description',
-                meta : {
-                    description : '설명글' // Change of nickname
-                }
-            },
-            // Profile Log
-            {
-                index : { }, // Post User Primey Key,
-                type : 'profile_log',
-                meta : {
-                    change : [ 'thumbnail', 'nickname', 'description' ] // Enable Meta Insert to Array
-                }
-            },
-        ];
+    const InsertPost = async () => {
+        let array = [];
+        let LogRun = false;
 
-        // User Collection need more table of description
-        const object = {
-            index : { }, // Post User Primary Key
-            nickname : '닉네임', // Change of nickname
-            meta : {
-                description : '설명', // Add Table Meta for description
-                thumbnail : {
-                    path : './path', // Thumbnail Path or Upload Image Collection's Primary Key
-                    type : 'default'
-                }
+        // Profile Thumbnail
+        if(Enable.thumbnail.change){
+            array.push({
+                index : user.index,
+                type : 'thumbnail',
+                meta : { thumbnail : { index : { } } },
+            });
+            LogRun = true;
+        };
+
+        // Profile Nickname
+        if(Enable.nickname.change){
+            if(typeof RequestData.nickname == 'string'){
+                array.push({
+                    index : user.index,
+                    type : 'nickname',
+                    meta : { nickname : RequestData.nickname },
+                });
+                LogRun = true;
             }
-        }
+        };
+
+        // Profile Description
+        if(Enable.description.change){
+            if(typeof RequestData.description == 'string'){
+                array.push({
+                    index : user.index,
+                    type : 'description',
+                    meta : { description : RequestData.description },
+                });
+                LogRun = true;
+            }
+        };
+
+        if(LogRun){
+            let TempObject = {
+                index : user.index,
+                type : 'profile_log',
+                meta : { change : [] },
+            };
+
+            console.log(TempObject);
+
+            if(Enable.thumbnail.change){ TempObject.meta.change.push('thumbnail') };
+            if(Enable.nickname.change){ TempObject.meta.change.push('nickname') };
+            if(Enable.description.change){ TempObject.meta.change.push('description') };
+            (TempObject.meta.change.length > 0) ? array.push(TempObject) : false;
+        };
+        
+        console.log(array);
     };
 
     const RunCommand = async () => {
         try {
             Verification();
-            // await Technology();
+            await Technology();
+            InsertPost();
             onResponse(req.body);
         }catch(err){
             onError(err);
