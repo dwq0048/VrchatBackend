@@ -129,8 +129,8 @@ const Profile = (req, res, next) => {
     const Technology = async () => {
         // 이미지 변경 가능
         if(Enable.thumbnail.change){
-            const temp = await LoadImage(user, 0, req.files, data.meta);
-            console.log(temp);
+            RequestData.thumbnail = await LoadImage(user, 0, req.files, data.meta);
+
         }
 
         // 닉네임 변경 가능
@@ -146,7 +146,7 @@ const Profile = (req, res, next) => {
         return RequestData;
     };
 
-    const InsertPost = async () => {
+    const InsertUserMeta = async () => {
         let array = [];
         let LogRun = false;
 
@@ -184,6 +184,7 @@ const Profile = (req, res, next) => {
             }
         };
 
+        // Profile Log
         if(LogRun){
             let TempObject = {
                 index : user.index,
@@ -191,22 +192,70 @@ const Profile = (req, res, next) => {
                 meta : { change : [] },
             };
 
-            console.log(TempObject);
-
             if(Enable.thumbnail.change){ TempObject.meta.change.push('thumbnail') };
             if(Enable.nickname.change){ TempObject.meta.change.push('nickname') };
             if(Enable.description.change){ TempObject.meta.change.push('description') };
             (TempObject.meta.change.length > 0) ? array.push(TempObject) : false;
         };
+
+        // Insert User Meta Schema
+        Schema.USER_META.Write.InsertMany(array).then((req) => {
+            console.log(req);
+        }).catch((err) => {
+            throw new Error(err);
+        });
         
-        console.log(array);
     };
+
+    const InsertUser = (req) => {
+        let InsertUser = [];
+        
+        req.map(item => {
+            if(typeof item == 'object'){
+                if(typeof item.type == 'string'){
+                    for(list in Enable){
+                        if(typeof Enable[list].change == 'boolean'){
+                            if(Enable[list].change){
+                                (list == item.type) ? InsertUser.push(list) : undefined
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        let object = { _id : user.index, meta : {} };
+        InsertUser.map(item => {
+            switch(item){
+                case 'thumbnail':
+                    if(typeof RequestData.thumbnail == 'object'){
+                        if(typeof RequestData.thumbnail.list == 'object' && typeof RequestData.thumbnail.status == 'boolean'){
+                            (RequestData.thumbnail.status && RequestData.thumbnail.list.length > 0) ? object.meta.thumbnail = RequestData.thumbnail.list[0] : undefined;
+                        }
+                    }
+                    break;
+                case 'nickname':
+                    object.nickname = RequestData.nickname;
+                    break;
+                case 'description':
+                    object.meta.description = RequestData.description;
+                    break;
+            }
+        });
+
+        Schema.USER.Write.Update(object).then((req) => {
+            console.log(req);
+        }).catch((err) => {
+            throw new Error(err);
+        })
+    }
 
     const RunCommand = async () => {
         try {
             Verification();
             await Technology();
-            InsertPost();
+            const MetaData = await InsertUserMeta();
+            InsertUser(MetaData);
             onResponse(req.body);
         }catch(err){
             onError(err);

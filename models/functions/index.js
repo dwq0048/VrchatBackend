@@ -505,9 +505,23 @@ const COMMENT = {
     }
 }
 
-const PROFILE = {
+const USER = {
     Write : {
-        ProfileMeta : (data) => {
+        Update : (data) => {
+            return new Promise((resolve, reject) => {
+                Schema.USER.findOneAndUpdate(data).then((req) => {
+                    resolve(req);
+                }).catch((err) => {
+                    reject(err);
+                })
+            });
+        }
+    }
+}
+
+const USER_META = {
+    Write : {
+        InsertMany : (data) => {
             return new Promise((resolve, reject) => {
                 Schema.USER_META.insertMany(data).then((req) => {
                     resolve(req);
@@ -545,5 +559,5 @@ const IMAGE = {
 }
 
 module.exports = {
-    POST, IMAGE, COMMENT, PROFILE,
+    POST, IMAGE, COMMENT, USER, USER_META,
 }
