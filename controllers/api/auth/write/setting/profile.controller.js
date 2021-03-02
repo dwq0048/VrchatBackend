@@ -214,7 +214,7 @@ const Profile = (req, res, next) => {
         }
     };
 
-    const InsertUser = (req) => {
+    const InsertUser = async (req) => {
         let InsertUser = [];
 
         req.map(item => {
@@ -231,7 +231,7 @@ const Profile = (req, res, next) => {
             }
         });
 
-        let object = { _id : user.index, meta : {} };
+        let object = { index : user.index, meta : {} };
         InsertUser.map(item => {
             switch(item){
                 case 'thumbnail':
@@ -250,15 +250,13 @@ const Profile = (req, res, next) => {
             }
         });
 
-        console.log(object);
-
-        /*
-        Schema.USER.Write.Update(object).then((req) => {
+        await Schema.USER.Write.Update(object).then((req) => {
             console.log(req);
         }).catch((err) => {
             throw new Error(err);
         });
-        */
+
+        return true;
     }
 
     const RunCommand = async () => {
@@ -266,8 +264,12 @@ const Profile = (req, res, next) => {
              Verification();
             await Technology();
             const MetaData = await InsertUserMeta();
-            InsertUser(MetaData);
-            onResponse(req.body);
+            const UserData = InsertUser(MetaData);
+            if(UserData){
+                onResponse(req.body);
+            }else{
+                onError({ message : 'wtf' });
+            }
         }catch(err){
             onError(err);
         }
