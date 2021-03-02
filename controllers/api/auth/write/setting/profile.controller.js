@@ -198,18 +198,25 @@ const Profile = (req, res, next) => {
             (TempObject.meta.change.length > 0) ? array.push(TempObject) : false;
         };
 
+        let result = false;
+
         // Insert User Meta Schema
-        Schema.USER_META.Write.InsertMany(array).then((req) => {
-            console.log(req);
+        await Schema.USER_META.Write.InsertMany(array).then((req) => {
+            result = req;
         }).catch((err) => {
             throw new Error(err);
         });
         
+        if(result){
+            return result;
+        }else{
+            throw new Error({ message : 'No Result for gl_user_meta collection' });
+        }
     };
 
     const InsertUser = (req) => {
         let InsertUser = [];
-        
+
         req.map(item => {
             if(typeof item == 'object'){
                 if(typeof item.type == 'string'){
@@ -243,16 +250,20 @@ const Profile = (req, res, next) => {
             }
         });
 
+        console.log(object);
+
+        /*
         Schema.USER.Write.Update(object).then((req) => {
             console.log(req);
         }).catch((err) => {
             throw new Error(err);
-        })
+        });
+        */
     }
 
     const RunCommand = async () => {
         try {
-            Verification();
+             Verification();
             await Technology();
             const MetaData = await InsertUserMeta();
             InsertUser(MetaData);
