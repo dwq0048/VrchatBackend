@@ -103,6 +103,10 @@ const token = (req, res, next) => {
                     index : user._id,
                     userid : user.userid,
                     nickname : user.nickname,
+                    meta : {
+                        thumbnail : (typeof user.meta.thumbnail == 'string' || typeof user.meta.thumbnail == 'object') ? user.meta.thumbnail : false,
+                        description : (typeof user.meta.description == 'string') ? user.meta.description : false,
+                    },
                     access : {
                         auth: user.info.auth,
                         rank: user.info.rank,
@@ -135,6 +139,10 @@ const token = (req, res, next) => {
                     index : user._id,
                     userid : user.userid,
                     nickname : user.nickname,
+                    meta : {
+                        thumbnail : (typeof user.meta.thumbnail == 'string' || typeof user.meta.thumbnail == 'object') ? user.meta.thumbnail : false,
+                        description : (typeof user.meta.description == 'string') ? user.meta.description : false,
+                    },
                     access : {
                         auth: user.info.auth,
                         rank: user.info.rank,
