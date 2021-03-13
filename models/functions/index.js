@@ -508,7 +508,6 @@ const COMMENT = {
 const USER = {
     Write : {
         Update : (data) => {
-            console.log(data);
             const filter = {
                 $or : [
                     { $and : [ { _id: new ObjectId(data.index) }, ] },
@@ -519,27 +518,22 @@ const USER = {
             if(typeof update.$set == 'object'){
                 if(typeof data.meta == 'object'){
                     // 썸네일
-                    console.log(typeof data.meta.thumbnail);
                     if(typeof data.meta.thumbnail == 'object' || typeof data.meta.thumbnail == 'string'){
                         update.$set.meta.thumbnail = new ObjectId(data.meta.thumbnail);
                     }
                     
                     // 닉네임
-                    console.log(typeof data.nickname);
                     if(typeof data.nickname == 'string'){
                         update.$set.nickname = data.nickname;
                     }
 
                     // 설명글
-                    console.log(typeof data.meta.description);
                     if(typeof data.meta.description == 'string'){
                         update.$set.meta.description = data.meta.description;
                     }
                 }
             }
             const options = { upsert : false, new : true };
-
-            console.log(update);
 
             return new Promise((resolve, reject) => {
                 Schema.USER.findOneAndUpdate(filter, update, options).then((req) => {
@@ -549,6 +543,32 @@ const USER = {
                 })
             });
         }
+    },
+    Read : {
+        Profile : (data) => {
+            return new Promise((resolve, reject) => {
+                try{
+                    Schema.USER.aggregate([
+                        {
+                            "$match" : { "_id" : new ObjectId(data.index) }
+                        },
+                        {
+                            "$limit" : 1
+                        },
+                    ],function(rr, ra){
+                        if(ra){
+                            if(ra.length > 0){
+                                resolve(ra[0]);
+                            }else{
+                                reject({message : false})
+                            }
+                        }
+                    });
+                }catch(e){
+                    reject(e);
+                }
+            })
+        }
     }
 }
 
@@ -556,7 +576,7 @@ const USER_META = {
     Write : {
         InsertMany : (data) => {
             return new Promise((resolve, reject) => {
-                Schema.USER_META.insertMany(data).then((req) => {
+                insertMany(data).then((req) => {
                     resolve(req);
                 }).catch((err) => {
                     reject(err);

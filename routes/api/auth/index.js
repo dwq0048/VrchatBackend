@@ -16,6 +16,9 @@ router.post('/info', Middleware.TOKEN, require('../../../controllers/api/auth/in
 // write
 router.post('/write/setting/profile', Middleware.TOKEN, Middleware.IMAGES({ path : 'profile', name : 'thumbnail', file : { type : 'array' } }), require('../../../controllers/api/auth/write/setting/profile.controller'));
 
+// read
+router.post('/read/capture_user', Middleware.TOKEN,  require('../../../controllers/api/auth/read/capture_user.controller'))
+
 // upload.array() => just use form-data
 
 module.exports = router;

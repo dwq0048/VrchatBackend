@@ -17,6 +17,7 @@ const Profile = (req, res, next) => {
         userid : LocalPayload.info.userid,
         access : LocalPayload.info.access
     };
+
     let data = {
         nickname : (!req.body.nickname || req.body.nickname == '' || req.body.nickname == undefined ) ? undefined : req.body.nickname,
         description : (!req.body.nickname || req.body.nickname == '' || req.body.nickname == undefined ) ? undefined : req.body.description,
@@ -251,7 +252,7 @@ const Profile = (req, res, next) => {
         });
 
         await Schema.USER.Write.Update(object).then((req) => {
-            console.log(req);
+            //console.log(req);
         }).catch((err) => {
             throw new Error(err);
         });
