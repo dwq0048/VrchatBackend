@@ -1,0 +1,25 @@
+{
+    "mode" : "run",
+    "front" : [
+        {
+            "protocal" : "https",
+            "name" : "admin",
+            "host" : "admin.codeboard.vrchat.kr"
+        },
+        {
+            "protocal" : "https",
+            "name" : "codeboard",
+            "host" : "codeboard.vrchat.kr"
+        }
+    ],
+    "db" : {
+        "protocal" : "mongodb",
+        "address" : "127.0.0.1",
+        "port" : "27017",
+        "collection" : "codeboard"
+    },
+    "jwt" : {
+        "secret" : "code",
+        "secret_re" : "codeboard"
+    }
+}

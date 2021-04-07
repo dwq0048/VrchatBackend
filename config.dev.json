@@ -1,0 +1,27 @@
+{
+    "mode" : "developer",
+    "front" : [
+        {
+            "protocal" : "http",
+            "name" : "admin",
+            "host" : "127.0.0.1",
+            "port" : "3030"
+        },
+        {
+            "protocal" : "http",
+            "name" : "codeboard",
+            "host" : "127.0.0.1",
+            "port" : "3010"
+        }
+    ],
+    "db" : {
+        "protocal" : "mongodb",
+        "address" : "127.0.0.1",
+        "port" : "27017",
+        "collection" : "codeboard"
+    },
+    "jwt" : {
+        "secret" : "code",
+        "secret_re" : "codeboard"
+    }
+}
