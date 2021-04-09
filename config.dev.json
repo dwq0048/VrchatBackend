@@ -22,6 +22,26 @@
     },
     "jwt" : {
         "secret" : "code",
-        "secret_re" : "codeboard"
+        "resecret" : "codeboard"
+    },
+    "upload" : {
+        "path" : "./public/uploads",
+        "type" : ["post","profile"],
+        "option" : {
+            "post" : {
+                "upload" : "post",
+                "resize" : {
+                    "size" : [ 480, 960, 1200 ]
+                },
+                "version" : "v0"
+            },
+            "profile" : {
+                "upload" : "profile",
+                "resize" : {
+                    "size" : [ 480, 960, 1200 ]
+                },
+                "version" : "v0"
+            }
+        }
     }
 }

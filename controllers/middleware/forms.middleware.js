@@ -1,16 +1,18 @@
-const Config = require('../../config/index.js');
+// Middleware,FORMS({ path : 'profile', name : 'thumbnail', file : { type : 'array' } })
 const multer = require('multer');
 
+// 컴퓨터 사용자 이름으로 Developer인지 아닌지 확인
+let Config = {};
+if(process.env.USERNAME == "Luochi"){ Config = require('../../config.dev.json') }else{ Config = require('../../config.json') };
+
 module.exports = (object) => {
-    let options = {
-        type : false,
-        name : false,
-        file : {},
-    };
+    let options = { type : false, name : false, file : {} };
+    if(!object){ return multer({}).single() };
 
     if(typeof object == 'object'){
+        console.log(object);
         if(typeof object.path == 'string'){
-            Config.UPLOAD.type.map((item) => { (item == object.path) ? options.type = object.path : undefined });
+            Config.upload.type.map((item) => { (item == object.path) ? options.type = object.path : undefined });
             (!options.type) ? options.type = 'post' : undefined;
         };
         if(typeof object.name == 'string'){
@@ -30,20 +32,22 @@ module.exports = (object) => {
     }
     (!upload) ? upload = multer() : undefined;
 
-    if(typeof object.file == 'object'){
-        if(typeof object.file.type == 'string'){
-            if(object.file.type == 'array'){
-                options.file.type = 'array'
-            }else if(object.file.type == 'single'){
-                options.file.type = 'single'
-            }else{
-                options.file.type = 'array'
-            }
+    if(options.file){    
+        if(typeof object.file == 'object'){
+            if(typeof object.file.type == 'string'){
+                if(object.file.type == 'array'){
+                    options.file.type = 'array'
+                }else if(object.file.type == 'single'){
+                    options.file.type = 'single'
+                }else{
+                    options.file.type = 'array'
+                }
 
-            if(typeof object.file.max == 'string' || typeof object.file.max == 'number'){
-                options.file.max = object.file.max;
-            }else{
-                options.file.max = false;
+                if(typeof object.file.max == 'string' || typeof object.file.max == 'number'){
+                    options.file.max = object.file.max;
+                }else{
+                    options.file.max = false;
+                }
             }
         }
     }

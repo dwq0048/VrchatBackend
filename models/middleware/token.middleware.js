@@ -16,30 +16,43 @@ const token = (req, res, next) => {
     }
 
     // 엑세스 토큰 검증
-    const access = new Promise((resolve, reject) => {
-        jwt.verify(token.access, secret, (err, decoded) => {
-            if(err) reject(err);
-
-            resolve({decode: decoded});
+    const access = async () => {
+        return new Promise((resolve, reject) => {
+            jwt.verify(token.access, secret, (err, decoded) => {
+                if(err){
+                    reject(err);
+                }else{
+                    resolve({decode: decoded});
+                }
+            })
         })
-    })
+    }
 
     // 리플레시 토큰 검증
-    const refresh = new Promise((resolve, reject) => {
-        jwt.verify(token.refresh, ReSecret, (err, decoded) => {
-            if(err) reject(err);
+    /*
+    const refresh = async () => {
+        return new Promise((resolve, reject) => {
+            try {
+                await jwt.verify(token.refresh, ReSecret, (err, decoded) => {
+                    if(err) {
+                        reject(err);
+                    }else{
+                        resolve({ decode: decoded });
+                    }
+                });
+            }catch(e){
+                throw new Error('idk');
+            }
+        })
+    }
 
-            resolve({
-                decode: decoded
-            });
-        });
-    })
+    /*
 
     // 만료된 토큰 리플레시 토큰 검증
     // 엑세스 토큰만 재발급 및 SESSION DB 업그레이드
-    const issued = (decoded) => {
+    const issued = async (decoded) => {
         return new Promise((resolve, reject) => {
-            Session.findOneByToken(token.refresh).then((req) => {
+            await Session.findOneByToken(token.refresh).then((req) => {
                 if(req.verify(client, decoded.decode.userid, token.access)){
                     const data = {
                         access : jwt.sign( { _id: decoded.decode._id, userid: decoded.decode.userid }, secret, { expiresIn: '10m', }),
@@ -61,27 +74,31 @@ const token = (req, res, next) => {
     }
 
     // 만료된 토큰 일경우
-    const check = (err) => {
+    const check = async (err) => {
         switch(err.name){
             case 'TokenExpiredError':
                 accessExpired();
                 break;
             default:
-                onError(err);
+                throw new Error('idk');
         }
     }
 
     // 만료된 토큰 검증
-    const accessExpired = () => {
-        refresh.then((decode) => {
-            issued(decode).then((reToken) => {
+    const accessExpired = async () => {
+        refresh().then((decode) => {
+            await issued(decode).then((reToken) => {
                 respondExpired(reToken);
-            }).catch(onError);
-        }).catch(onError)
+            }).catch((err) => {
+                throw new Error('idk');
+            });
+        }).catch((err) => {
+            throw new Error('idk');
+        })
     }
 
     // 정상적인 토큰일 경우 전송
-    const respond = (json) => {
+    const respond = async (json) => {
         User.findOneByUserId(json.decode.userid).then((user) => {
             const payload = {
                 status: 'success',
@@ -113,7 +130,7 @@ const token = (req, res, next) => {
     }
 
     // 만료된 토큰 재발급 전송
-    const respondExpired = (reToken) => {
+    const respondExpired = async (reToken) => {
         User.findOneByUserId(reToken.userid).then((user) => {
             reToken.refresh = token.refresh;
             const result = secretToken.encryption(reToken);
@@ -134,8 +151,6 @@ const token = (req, res, next) => {
                     }
                 }
             };
-
-            //res.cookie('_SESSION', result).status(200).json(payload);
             console.log("토큰 문제 없음...");
             res.locals.payload = payload;
             res.locals.result = result;
@@ -147,19 +162,23 @@ const token = (req, res, next) => {
     }
 
     // 에러
-    const onError = (err) => {
+    const onError = async (err) => {
         const payload = {
             status: 'fail',
             message: err.message
         }
-
-        //res.status(200).json(payload);
         res.locals.payload = payload;
 
         next();
     }
 
-    access.then(respond).catch(check)
+    */
+
+    access().then((data) => {
+        console.log(data);
+    }).catch((err) => {
+        console.log(err);
+    })
 }
 
 module.exports = token;

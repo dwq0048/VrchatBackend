@@ -3,16 +3,8 @@ const cors = require('cors');
 const { networkInterfaces } = require('os');
 
 const mongoose = require('mongoose');
-//const Schema = require('../../models/functions/index.js');
 const Helper = require('../../models/helper/index');
-
-let Config = {};
-// 컴퓨터 사용자 이름으로 Developer인지 아닌지 확인
-if(process.env.USERNAME == "Luochi"){
-    Config = require('../../config.dev.json');
-}else{
-    Config = require('../../config.json');
-}
+const Config = (process.env.USERNAME == "Luochi") ? require('../../config.dev.json') : require('../../config.json');
 let data = { results : [] };
 
 const functions = {
@@ -53,7 +45,7 @@ const functions = {
     },
     _jwt : (app) => {
         app.set('jwt-secret', Config.jwt.secret);
-        app.set('jwt-secret-', Config.jwt.secret_);
+        app.set('jwt-resecret', Config.jwt.resecret);
     },
     _mkdir : async () => {
         const Today = Helper.formatDate(Date.now());

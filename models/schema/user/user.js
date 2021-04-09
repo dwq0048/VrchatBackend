@@ -34,24 +34,6 @@ const User = new mongoose.Schema({
     meta : { type : Object, default : Object },
 }, { collection: 'gl_user', versionKey: false });
 
-User.statics.create = function(data){
-    const user = new this(data);
-    
-    return user.save();
-}
-
-User.statics.findOneByUserId = function(userid){
-    return this.findOne({
-        userid
-    }).exec()
-}
-
-User.statics.findOneByIndex = function(userid){
-    return this.findOne({
-        _id
-    }).exec()
-}
-
 User.methods.verify = function(password){
     return this.password == password
 }

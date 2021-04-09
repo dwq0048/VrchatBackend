@@ -5,7 +5,8 @@ const Schema = {
     COMMENT : require('../schema/post/comment'),
     USER : require('../schema/user/user'),
     USER_META : require('../schema/user/user.meta'),
-    IMAGE : require('../schema/file/image')
+    IMAGE : require('../schema/file/image'),
+    SESSION : require('../schema/user/session')
 };
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -545,6 +546,23 @@ const USER = {
         }
     },
     Read : {
+        FindByID : (data) => {
+            return new Promise((resolve, reject) => {
+                try {                
+                    Schema.USER.findOne({ userid : data }).then((req) => {
+                        if(typeof req == 'object'){
+                            resolve(req);
+                        }else{
+                            reject({ message : 'fail' });
+                        }
+                    }).catch((err) => {
+                        reject(err);
+                    })
+                }catch(err){
+                    throw new Error(err.message);
+                }
+            });
+        },
         Profile : (data) => {
             return new Promise((resolve, reject) => {
                 try{
@@ -586,6 +604,20 @@ const USER_META = {
     }
 }
 
+const SESSION = {
+    Write : {
+        Create : (data) => {
+            return new Promise((resolve, reject) => {           
+                Schema.SESSION.create(data).then((req) => {
+                    resolve(req);
+                }).catch((err) => {
+                    reject(err);
+                });
+            })
+        }
+    }
+}
+
 const IMAGE = {
     Read : {
         View : (data) => {
@@ -612,5 +644,5 @@ const IMAGE = {
 }
 
 module.exports = {
-    POST, IMAGE, COMMENT, USER, USER_META,
+    POST, IMAGE, COMMENT, USER, USER_META, SESSION,
 }

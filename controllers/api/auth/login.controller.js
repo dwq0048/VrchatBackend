@@ -1,35 +1,30 @@
-const Schema = {
-    USER : require('../../../models/schema/user/user'),
-    SESSION :  require('../../../models/schema/user/session')
-}
-
 const jwt = require('jsonwebtoken');
+const Schema = require('../../../models/functions');
 const secretToken = require('../../../models/helper/secret-token');
 
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
+    const onResponse = (token) => {
+        res.cookie('_SESSION', secretToken.encryption(token.token), { httpOnly: true }) .status(200).json({ status: 'success', info: token.info });
+    }
+    const onError = (err) => { res.status(200).json({ status: 'fail', message: err.message }) };
+    (!req.body || typeof req.body != 'object') ? onError({ message : 'Unknown error' }) : undefined;
+
     const secret = req.app.get('jwt-secret');
-    const ReSecret = req.app.get('jwt-re-secret');
+    const ReSecret = req.app.get('jwt-resecret');
 
-    // 클라이언트 정보
-    const client = {
-        userAgent : req.headers["user-agent"] || req.get('User-Agent'),
-        //host : req.ip || req.headers.host
-    }
-
-    // 전송받은 데이터
+    const client = { userAgent : req.headers["user-agent"] || req.get('User-Agent') }
     const payload = {
-        userid : req.body.USER_ID,
-        userpw : req.body.USER_PW
+        userid : ( typeof req.body.USER_ID == 'string' ) ? req.body.USER_ID : false,
+        userpw : ( typeof req.body.USER_PW == 'string' ) ? req.body.USER_PW : false,
     }
 
-    // 로그인 검증
-    const token = (user) => {
+    const onToken = async (user) => {
         if(user){
             if(user.verify(payload.userpw)){
                 return new Promise((resolve, reject) => {
                     try {
-                        resolve({
+                        const data = {
                             token : {
                                 access : jwt.sign( { _id: user._id, userid: user.userid }, secret, { expiresIn: secretToken.AccessTime, }),
                                 refresh : jwt.sign( { _id: user._id, userid: user.userid }, ReSecret, { expiresIn: secretToken.RefreshTime, })    
@@ -37,6 +32,11 @@ const login = (req, res, next) => {
                             info : {
                                 index : user._id,
                                 userid : user.userid,
+                                nickname : user.nickname,
+                                meta : {
+                                    thumbnail : (typeof user.meta.thumbnail == 'string' || typeof user.meta.thumbnail == 'object') ? user.meta.thumbnail : false,
+                                    description : (typeof user.meta.description == 'string') ? user.meta.description : false,
+                                },
                                 access : {
                                     auth: user.info.auth,
                                     rank: user.info.rank,
@@ -45,30 +45,33 @@ const login = (req, res, next) => {
                                     experience: user.info.experience
                                 }
                             }
-                        });
+                        };
+                        resolve(data);
                     } catch (e){
-                        console.log(e);
-                        reject('jwt error');
+                        reject('Jwt Error');
                     }
                 })
             }else{
-                throw new Error('User PW is wrong')
-            }  
+                throw new Error('User is Wrong');
+                //throw new Error('User PW is Wrong');
+            }
         }else{
-            throw new Error('User ID is wrong')
+            throw new Error('User is Wrong');
+            //throw new Error('User ID is Wrong');
         }
     }
 
-    // 최초 세션 등록
-    const onSession = (token) => {
+    const onSession = async (token) => {
         try {
             return new Promise((resolve, reject) => {
-                Schema.SESSION.create({
+                const data = {
                     user: payload.userid,
                     client: JSON.stringify(client),
                     access: token.token.access,
                     refresh: token.token.refresh
-                }).then(() => {
+                }
+
+                Schema.SESSION.Write.Create(data).then(() => {
                     resolve(token);
                 }).catch(() => {
                     reject('db error');
@@ -79,28 +82,11 @@ const login = (req, res, next) => {
         }
     }
 
-    // 정상적일 경우 등록
-    const respond = (token) => {
-        const data = secretToken.encryption(token.token);
-
-        res.cookie('_SESSION', data, { httpOnly: true })
-        .status(200).json({
-            status: 'success',
-            info: token.info
-        });
+    const RunCommand = async () => {
+        Schema.USER.Read.FindByID(payload.userid).then(onToken).then(onSession).then(onResponse).catch(onError);
     }
+    RunCommand();
 
-    // 에러
-    const onError = (err) => {
-        console.log(err);
-        res.status(200).json({
-            status: 'fail',
-            message: err.message
-        });
-    }
-
-    Schema.USER.findOneByUserId(payload.userid)
-    .then(token).then(onSession).then(respond).catch(onError);
 }
 
 module.exports = login;
