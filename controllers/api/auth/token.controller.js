@@ -9,22 +9,21 @@ const token = (req, res, next) => {
 
     const LocalToken = res.locals.token;
 
-    const RunCommand = () => {
-        if(LocalToken || typeof LocalToken == 'object'){
-            if(typeof LocalToken.status == 'string'){
-                if(LocalToken.status == 'success'){
-                    onResponse({ data : 'haha' });
+    const RunCommand = async () => {
+        return new Promise((resolve, reject) => {
+            if(LocalToken || typeof LocalToken == 'object'){
+                if(typeof LocalToken.status == 'string'){
+                    (LocalToken.status == 'success') ? resolve({ data : 'haha' }) : reject({ message : LocalToken.error });
                 }else{
-                    onError({ message : 'Token authentication failed' });
+                    throw new Error('Token is empty');
                 }
             }else{
-                onError({ message : 'Token is empty' });
+                throw new Error('Token is empty');
             }
-        }else{
-            onError({ message : 'Token is empty' });
-        }
+        });
     }
-    RunCommand();
+
+    RunCommand().then(onResponse).catch(onError);
 }
 
 module.exports = token;

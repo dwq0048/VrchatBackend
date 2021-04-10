@@ -9,7 +9,8 @@ const Token = (req, res, next) => {
 
     const onError = async (err) => {
         err = (typeof err == 'object' || typeof err == 'string') ? err : {};
-        (typeof err.message == 'string') ? err.message = false : undefined;
+        (typeof err.message != 'string') ? err.message = false : undefined;
+        console.log(err);
         res.locals.token = { status : 'fail', error : err.message };
         next();
     }
@@ -18,22 +19,64 @@ const Token = (req, res, next) => {
     const client = { userAgent : req.headers["user-agent"] || req.get('User-Agent') }
 
     // 엑세스 토큰 검증
-    const access = async () => {
+    const Access = async () => {
         if(!token){ throw new Error('Token is empty') };
-        /*
         return new Promise((resolve, reject) => {
-            if(!token){
-                onError({ message : 'Empty Token' });
-            };
             try{
                 jwt.verify(token.access, secret, (err, decoded) => {
-                    if(err){ reject(err) }else{ resolve({ decode: decoded }) }
+                    if(err){
+                        switch(err.message){
+                            case 'jwt expired':
+                                TokenEexpired();
+                                break;
+                            default:
+                                reject(err);
+                        }
+                    }else{
+                        resolve(decoded);
+                    }
                 })
             }catch(err){
-                onError({ message : 'Refresh Error', error : err });
+                throw new Error(err.message);
             }
         })
-        */
+    }
+
+    const Verification = async (data) => {
+        Schema.USER.Read.FindByID({ _id : data._id }).then((user) => {
+            const payload = {
+                status: 'success',
+                message: 'Token authentication complete',
+                info : {
+                    index : user._id,
+                    userid : user.userid,
+                    nickname : user.nickname,
+                    meta : {
+                        thumbnail : (typeof user.meta.thumbnail == 'string' || typeof user.meta.thumbnail == 'object') ? user.meta.thumbnail : false,
+                        description : (typeof user.meta.description == 'string') ? user.meta.description : false,
+                    },
+                    access : {
+                        auth: user.info.auth,
+                        rank: user.info.rank,
+                        point: user.info.point,
+                        check: user.info.check,
+                        experience: user.info.experience
+                    }
+                }
+            };
+
+            console.log("재발급 진행...");
+            console.log(payload);
+            res.locals.payload = payload;
+
+            next();
+        }).catch((err) => {
+            throw new Error(err.message);
+        })
+    }
+
+    const TokenEexpired = () => {
+        throw new Error('쿠쿠루삥뽕 토큰 기간 다됨ㅋㅋ');
     }
 
     // 리플레시 토큰 검증
@@ -167,11 +210,7 @@ const Token = (req, res, next) => {
     }
     */
 
-    access().then((data) => {
-        onError(data);
-    }).catch((data) =>{
-        onError(data);
-    });
+    Access().then(Verification).catch(onError);
 }
 
 module.exports = Token;

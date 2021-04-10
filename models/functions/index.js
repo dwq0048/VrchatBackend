@@ -549,7 +549,7 @@ const USER = {
         FindByID : (data) => {
             return new Promise((resolve, reject) => {
                 try {                
-                    Schema.USER.findOne({ userid : data }).then((req) => {
+                    Schema.USER.findOne(data).then((req) => {
                         if(typeof req == 'object'){
                             resolve(req);
                         }else{

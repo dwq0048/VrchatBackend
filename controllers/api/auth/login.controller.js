@@ -65,7 +65,7 @@ const login = async (req, res, next) => {
         try {
             return new Promise((resolve, reject) => {
                 const data = {
-                    user: payload.userid,
+                    user: token.info.info,
                     client: JSON.stringify(client),
                     access: token.token.access,
                     refresh: token.token.refresh
@@ -83,7 +83,7 @@ const login = async (req, res, next) => {
     }
 
     const RunCommand = async () => {
-        Schema.USER.Read.FindByID(payload.userid).then(onToken).then(onSession).then(onResponse).catch(onError);
+        Schema.USER.Read.FindByID({ userid : payload.userid }).then(onToken).then(onSession).then(onResponse).catch(onError);
     }
     RunCommand();
 
