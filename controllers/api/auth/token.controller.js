@@ -1,6 +1,6 @@
 const token = (req, res, next) => {
     const onError = (err) => {
-        res.status(200).json({ status: 'fail', message: err.message });
+        res.status(200).json({ status: false, message: err.message });
     }
 
     const onResponse = (payload) => {
@@ -12,8 +12,8 @@ const token = (req, res, next) => {
     const RunCommand = async () => {
         return new Promise((resolve, reject) => {
             if(LocalToken || typeof LocalToken == 'object'){
-                if(typeof LocalToken.status == 'string'){
-                    (LocalToken.status == 'success') ? resolve({ data : 'haha' }) : reject({ message : LocalToken.error });
+                if(typeof LocalToken.status == 'string' || typeof LocalToken.status == 'boolean'){
+                    (LocalToken.status == 'success') ? resolve(LocalToken) : reject({ status : false, message : LocalToken.error });
                 }else{
                     throw new Error('Token is empty');
                 }

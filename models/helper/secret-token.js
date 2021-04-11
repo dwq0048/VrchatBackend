@@ -23,8 +23,8 @@ const secret = {
             return false;
         }
     },
-    AccessTime : '30m',
-    RefreshTime : '7d'
+    AccessTime : '10m',
+    RefreshTime : '30m'
 }
 
 module.exports = secret;

@@ -605,9 +605,54 @@ const USER_META = {
 }
 
 const SESSION = {
+    Read : {
+        Verification : (data) => {
+            return new Promise((resolve, reject) => {
+                let array = [
+                    {
+                        "$lookup" : {
+                            "from" : Schema.USER.collection.name,
+                            "localField" : "index",
+                            "foreignField" : "_id",
+                            "as" : "users"
+                        }
+                    }
+                ];
+                if(!data.type){
+                    array.push({ "$match" : { "access" : data.access } });
+                }else{
+                    array.push({ "$match" : { "access" : data.access, "refresh" : data.refresh } });
+                }
+
+                Schema.SESSION.aggregate(array, function(rr,ra){
+                    if(ra){
+                        if(typeof ra == 'object' || typeof ra == 'array'){
+                            if(ra.length > 0){
+                                if(typeof ra[0].users == 'object' || typeof ra[0].users == 'array'){
+                                    if(ra[0].users.length > 0){
+                                        ra = ra[0];
+                                        ra.users = ra.users[0];
+                                        resolve(ra);
+                                    }else{
+                                        reject({ message : 'No data' });
+                                    }
+                                }
+                            }else{
+                                reject({ message : 'No data' });
+                            }
+                        }else{
+                            reject({ message : 'No data' });
+                        }
+                    }else{
+                        reject({ message : 'No data' });
+                    }
+                })
+            });
+        },
+    },
     Write : {
         Create : (data) => {
-            return new Promise((resolve, reject) => {           
+            return new Promise((resolve, reject) => {
                 Schema.SESSION.create(data).then((req) => {
                     resolve(req);
                 }).catch((err) => {
@@ -615,7 +660,27 @@ const SESSION = {
                 });
             })
         }
+    },
+    /*
+    Delete : {
+        expiration : (data) => {
+            return new Promise((resolve, reject) => {
+                Schema.SESSION.aggregate([
+                    {
+                        "$match" : {
+                            "$and" : [
+                                { "index" : data.index },
+                                { "issued" : { "$lt" :  } }
+                            ]
+                        }
+                    }
+                ]).forEach(function(doc) {
+                    db.getCollection("Collection").remove({ "_id": doc._id });
+                });
+            })
+        }
     }
+    */
 }
 
 const IMAGE = {

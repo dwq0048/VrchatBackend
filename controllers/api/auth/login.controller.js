@@ -26,8 +26,8 @@ const login = async (req, res, next) => {
                     try {
                         const data = {
                             token : {
-                                access : jwt.sign( { _id: user._id, userid: user.userid }, secret, { expiresIn: secretToken.AccessTime, }),
-                                refresh : jwt.sign( { _id: user._id, userid: user.userid }, ReSecret, { expiresIn: secretToken.RefreshTime, })    
+                                access : jwt.sign( { _id: user._id }, secret, { expiresIn: secretToken.AccessTime, }),
+                                refresh : jwt.sign( { _id: user._id }, ReSecret, { expiresIn: secretToken.RefreshTime, })    
                             },
                             info : {
                                 index : user._id,
@@ -65,7 +65,7 @@ const login = async (req, res, next) => {
         try {
             return new Promise((resolve, reject) => {
                 const data = {
-                    user: token.info.info,
+                    index: token.info.index,
                     client: JSON.stringify(client),
                     access: token.token.access,
                     refresh: token.token.refresh
