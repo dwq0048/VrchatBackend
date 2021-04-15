@@ -1,6 +1,6 @@
 const Schema = require('../../../../models/functions');
 const Helper = require('../../../../models/helper/index');
-const Config = require('../../../../config/index.js');
+const Config = (process.env.USERNAME == "Luochi") ? require('../../../../config.dev.json') : require('../../../../config.json');
 
 const { promisify } = require('util');
 const sizeOf = promisify(require('image-size'));

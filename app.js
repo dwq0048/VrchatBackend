@@ -15,6 +15,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use('/api/v1/auth/', require('./routes/api/v1/auth.js'));
+app.use('/api/v1/board/', require('./routes/api/v1/board.js'));
 
 //app.use((req, res, next) => { next(createError(404)) });
 //app.use((err, req, res, next) => { res.status(404).json({ message: err.message }) });
