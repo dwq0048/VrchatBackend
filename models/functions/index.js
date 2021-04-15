@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = {
+    META : require('../schema/post/meta'),
     POST : require('../schema/post/post'),
     POST_META : require('../schema/post/post.meta'),
     COMMENT : require('../schema/post/comment'),
