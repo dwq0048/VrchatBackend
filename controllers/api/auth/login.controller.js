@@ -5,9 +5,13 @@ const secretToken = require('../../../models/helper/secret-token');
 
 const login = async (req, res, next) => {
     const onResponse = (token) => {
-        res.cookie('_SESSION', secretToken.encryption(token.token), { httpOnly: true }) .status(200).json({ status: 'success', info: token.info });
+        if(process.env.USERNAME == "Luochi"){
+            res.cookie('_SESSION', secretToken.encryption(token.token), { httpOnly: true }) .status(200).json({ status: 'success', info: token.info });
+        }else{
+            res.cookie('_SESSION', secretToken.encryption(token.token), { secure: true }) .status(200).json({ status: 'success', info: token.info });
+        }
     }
-    const onError = (err) => { res.status(200).json({ status: 'fail', message: err.message }) };
+    const onError = (err) => { console.log(err); res.status(200).json({ status: 'fail', message: err.message }) };
     (!req.body || typeof req.body != 'object') ? onError({ message : 'Unknown error' }) : undefined;
 
     const secret = req.app.get('jwt-secret');
@@ -48,16 +52,14 @@ const login = async (req, res, next) => {
                         };
                         resolve(data);
                     } catch (e){
-                        reject('Jwt Error');
+                        reject(e);
                     }
                 })
             }else{
                 throw new Error('User is Wrong');
-                //throw new Error('User PW is Wrong');
             }
         }else{
             throw new Error('User is Wrong');
-            //throw new Error('User ID is Wrong');
         }
     }
 

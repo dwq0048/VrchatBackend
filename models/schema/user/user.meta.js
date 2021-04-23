@@ -8,9 +8,9 @@ const UserMeta = new mongoose.Schema({
 }, { collection: 'gl_user_meta', versionKey: false });
 
 UserMeta.statics.create = function(data){
-    const data = new this(data);
+    const result = new this(data);
     
-    return data.save();
+    return result.save();
 }
 
 module.exports = mongoose.model('UserMeta', UserMeta, true);

@@ -12,7 +12,7 @@ middleware.app({ app : app });
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser('hi'));
 
 app.use('/api/v1/auth/', require('./routes/api/v1/auth.js'));
 app.use('/api/v1/board/', require('./routes/api/v1/board.js'));

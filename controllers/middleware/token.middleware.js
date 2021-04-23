@@ -75,7 +75,11 @@ const Token = (req, res, next) => {
 
     const ReResponse = (req) => {
         console.log("재발급됨");
-        res.cookie('_SESSION', secretToken.encryption(req.token), { httpOnly: true });
+        if(process.env.USERNAME == "Luochi"){
+            res.cookie('_SESSION', secretToken.encryption(req.token), { httpOnly: true });
+        }else{
+            res.cookie('_SESSION', secretToken.encryption(req.token), { secure: true });
+        }
         const payload = {
             status: 'success',
             message: 'Token reissuance success',

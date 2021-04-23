@@ -22,11 +22,12 @@ const functions = {
             });
         }else{
             Config.front.map((item) => {
-                data.results.push(`${ (typeof item.protocal == 'string') ? item.protocal + '://' : '' }${ (typeof item.host == 'string') ? item.host : '127.0.0.1' }${ (typeof item.host == 'string' || typeof item.host == 'number' ) ? ':' + item.host : '' }`);
+                data.results.push(`${ (typeof item.protocal == 'string') ? item.protocal + '://' : '' }${ (typeof item.host == 'string') ? item.host : '127.0.0.1' }${ (typeof item.port == 'string' || typeof item.port == 'number' ) ? ':' + item.port : '' }`);
             });
         }
     },
     _cors : (app) => {
+        console.log(data.results);
         app.use(cors({ origin: data.results, credentials: true }));
     },
     _mongoose : () => {
